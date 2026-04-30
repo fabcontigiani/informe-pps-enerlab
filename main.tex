@@ -167,6 +167,7 @@ La elección de los microcontroladores centrales se basó en la división de tar
 	\item \textbf{LMV324 (Amplificadores Operacionales):} Seleccionados por su capacidad de salida \textit{Rail-to-Rail} y su bajo costo, utilizados en las etapas de acondicionamiento de señal para escalar y desplazar las lecturas de los sensores al rango dinámico del ADC (0-3.3V).
 	\item \textbf{ZMPT101B (Sensor de Tensión):} Transformador de tensión activo de bajo costo, capaz de medir niveles de tensión AC comerciales (hasta 250V RMS), cumpliendo con los rangos operativos requeridos para el monitoreo residencial e industrial ligero.
 	\item \textbf{SCT-013 (Sensor de Corriente):} Transformador de corriente de núcleo partido (\textit{split-core}) que permite una instalación no invasiva. Su capacidad de medición de hasta 70A RMS se alinea perfectamente con los objetivos de costo y prestaciones definidos por la empresa para este medidor.
+	\item \textbf{Etapa de Alimentación Interna:} El dispositivo integra una fuente conmutada (\textit{AC-DC Switching Power Supply}) que permite su funcionamiento autónomo mediante la toma de energía directa de la Fase 1 de la red eléctrica, simplificando significativamente el proceso de instalación al prescindir de fuentes externas.
 \end{itemize}
 
 \subsubsection{Acondicionamiento de Señal y Auto-ranging}
@@ -239,7 +240,8 @@ El ESP32-C3 actúa como puente entre el hardware de medición y la infraestructu
 	\item \textbf{Gestión de Conectividad:} Utiliza la librería \textit{WiFiManager} para permitir al usuario configurar las credenciales de red mediante un portal cautivo, evitando la necesidad de hardcodear datos de acceso.
 	\item \textbf{Seguridad en la Transmisión:} La comunicación con el servidor se realiza mediante el protocolo MQTTS. Se integra el certificado raíz de \textit{Let's Encrypt} para validar la identidad del broker y establecer un túnel cifrado TLS 1.2.
 	\item \textbf{Intercambio de Datos:} Recibe tramas JSON desde el STM32 vía UART, las procesa para añadir metadatos de diagnóstico y las publica en tópicos MQTT estructurados por la dirección MAC del dispositivo.
-	\item \textbf{Diagnóstico Local:} Implementa un sistema de \textit{logging} persistente en la memoria flash (\textit{LittleFS}), accesible a través de una interfaz web interna para tareas de mantenimiento y depuración.
+	\item \textbf{Diagnóstico Local:} Implementa un sistema de \textit{logging} persistente en la memoria flash (\textit{LittleFS}), accesible a través de una interfaz web interna.
+	\item \textbf{Resolución de Nombres (mDNS):} Soporta el protocolo de red \textit{multicast DNS}, permitiendo que los usuarios accedan a la interfaz de configuración mediante el nombre de dominio local \texttt{enerlab.local}, facilitando el acceso sin necesidad de conocer la dirección IP asignada por el router.
 \end{itemize}
 
 \subsubsection{Portal Captivo y Monitoreo Local}
@@ -248,7 +250,7 @@ El dispositivo implementa una interfaz de configuración y monitoreo local acces
 
 \begin{itemize}
 	\item \textbf{Portal Captivo de Configuración:} Utilizando la librería \textit{WiFiManager}, el ESP32 es capaz de detectar la falta de conectividad y activar un modo de Punto de Acceso (AP) con un portal captivo. Este portal permite al usuario seleccionar la red Wi-Fi local e ingresar las credenciales sin que estas queden grabadas de forma estática en el código fuente. La interfaz ha sido personalizada con el logotipo del proyecto y un menú simplificado.
-	\item \textbf{Panel de Monitoreo y Herramientas:} Una vez establecida la conexión, el gateway sirve una interfaz web que permite visualizar el estado de la conexión MQTT, las versiones de firmware de ambos microcontroladores y realizar acciones de mantenimiento como el reinicio remoto del dispositivo.
+	\item \textbf{Panel de Monitoreo y Herramientas:} Una vez establecida la conexión, el gateway sirve una interfaz web accesible mediante \texttt{enerlab.local}. Esta permite visualizar el estado de la conexión MQTT, las versiones de firmware de ambos microcontroladores y realizar acciones de mantenimiento como el reinicio remoto del dispositivo.
 	\item \textbf{Visualización de Logs:} A través de la ruta \texttt{/logs}, el servidor web del ESP32 entrega el contenido del archivo de registro almacenado en \textit{LittleFS}, permitiendo una depuración rápida de problemas de red o comunicación con el STM32.
 \end{itemize}
 
@@ -431,6 +433,90 @@ Todo el material desarrollado para este proyecto, incluyendo el firmware de los 
 
 	\item \textbf{Proyecto KiCad (Hardware y PCB):} Archivos de diseño esquemático, ruteo del PCB y modelos 3D del hardware. \\ \url{https://github.com/fabcontigiani/kicad-pps-enerlab}
 \end{itemize}
-\section{Manual de Usuario}
+\section{Manual de Usuario y Guía Técnica}
+
+Este anexo proporciona las directrices necesarias para la correcta instalación física del dispositivo, su configuración lógica y el despliegue de la infraestructura de backend por parte del personal de la empresa.
+
+\subsection{Guía de Instalación y Conexión Eléctrica}
+
+Para asegurar la exactitud de las mediciones, el dispositivo debe conectarse siguiendo el esquema de fases de la instalación fotovoltaica:
+
+\begin{enumerate}
+	\item \textbf{Sensores de Corriente (SCT-013):} Deben abrazar los conductores de fase antes de la entrada al tablero principal. Es fundamental respetar la dirección de la flecha grabada en el sensor (apuntando hacia la carga) para evitar lecturas de potencia invertidas.
+	\item \textbf{Conexión de Tensión y Neutro:} El dispositivo cuenta con conectores específicos para las tres fases y el neutro. No se requiere cableado adicional para los transformadores internos; basta con insertar el conector correspondiente asegurando un contacto firme para una medición de tensión segura y precisa.
+	\item \textbf{Alimentación:} El medidor es un sistema autónomo que se alimenta directamente de la Fase 1. No se requiere de una fuente de alimentación externa adicional, ya que el hardware integra su propia etapa de conversión AC-DC.
+\end{enumerate}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Esquema/Fotografía: Conexión de sensores y alimentación] \vspace{2cm} \end{minipage}}
+	\caption{Diagrama de conexión física del medidor en el tablero eléctrico.}
+	\label{fig:manual_instalacion}
+\end{figure}
+
+\subsection{Configuración Inicial del Dispositivo}
+
+Una vez energizado por primera vez, el medidor entrará en modo de configuración automática:
+
+\begin{enumerate}
+	\item \textbf{Conexión al AP:} Desde un dispositivo móvil o PC, buscar la red Wi-Fi denominada \texttt{Enerlab WiFiManager} e ingresar la clave \texttt{password}, la cual es configurable en el código fuente y puede ser modificada por la empresa.
+	\item \textbf{Portal Cautivo:} Al conectarse, se abrirá automáticamente un portal web. En caso de que esto no ocurra, navegar a \url{http://enerlab.local} o a la dirección IP \texttt{192.168.4.1}.
+	\item \textbf{Configuración de Red:} Seleccionar la red Wi-Fi local, ingresar la contraseña y guardar. El dispositivo se reiniciará e intentará conectarse al broker MQTT configurado por defecto.
+\end{enumerate}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura: Pasos de configuración en WiFiManager] \vspace{2cm} \end{minipage}}
+	\caption{Proceso de vinculación del dispositivo a la red Wi-Fi local.}
+	\label{fig:manual_wifimanager}
+\end{figure}
+
+\subsection{Monitoreo y Diagnóstico Local}
+
+El usuario o instalador puede acceder a la interfaz de diagnóstico local ingresando \url{http://enerlab.local} o la dirección IP asignada al medidor en su navegador. Esta interfaz permite:
+\begin{itemize}
+	\item Visualizar el estado de la comunicación con el broker MQTT.
+	\item Verificar las versiones de firmware instaladas.
+	\item Consultar los \textit{logs} de errores en tiempo real almacenados en la memoria interna (\textit{LittleFS}).
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura: Interfaz web de monitoreo local] \vspace{2cm} \end{minipage}}
+	\caption{Pantalla de estado y diagnóstico accesible vía mDNS (enerlab.local).}
+	\label{fig:manual_monitoreo_local}
+\end{figure}
+
+\subsection{Guía para la Empresa: Despliegue de Servicios y Gestión}
+
+El despliegue del backend se realiza de forma centralizada mediante Docker, siguiendo un flujo de trabajo que garantiza la seguridad y la portabilidad:
+
+\begin{enumerate}
+	\item \textbf{Preparación del Entorno:}
+	      \begin{itemize}
+		      \item Clonar el repositorio de infraestructura.
+		      \item Crear el archivo de configuración local: \texttt{cp .env.example .env}.
+		      \item Editar el archivo \texttt{.env} definiendo contraseñas robustas para la base de datos, secretos para Node-RED y ajustando la variable \texttt{TZ} a la zona horaria local.
+	      \end{itemize}
+	\item \textbf{Configuración de Red y Dominio:}
+	      \begin{itemize}
+		      \item Definir el dominio base en el \texttt{.env} para que el servicio SWAG gestione automáticamente los certificados TLS.
+		      \item \textbf{Intervención Manual en Mosquitto:} Dado que el servicio de mensajería no soporta variables de entorno en su configuración nativa, se debe editar manualmente el archivo \texttt{mosquitto/config/mosquitto.conf} para actualizar las rutas de los certificados (\texttt{cafile}, \texttt{certfile}, \texttt{keyfile}) con el nombre del dominio seleccionado.
+	      \end{itemize}
+	\item \textbf{Despliegue:} Ejecutar \texttt{docker-compose up -d}. Esto levantará automáticamente la base de datos TimescaleDB, el broker MQTT, Node-RED, Grafana y el proxy inverso.
+	\item \textbf{Gestión de Usuarios en Grafana:}
+	      \begin{itemize}
+		      \item Acceder al panel de administración de Grafana.
+		      \item Crear \textit{Organizations} independientes para cada cliente.
+		      \item Asignar usuarios con rol de \textit{Viewer} a sus respectivas organizaciones para asegurar que solo tengan acceso a sus datos históricos, manteniendo la privacidad de la información entre clientes de la empresa. Para más detalles sobre la configuración avanzada, consultar la documentación oficial de Grafana sobre \href{https://grafana.com/docs/grafana/latest/administration/user-management/}{gestión de usuarios} y \href{https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/}{roles y permisos}.
+	      \end{itemize}
+\end{enumerate}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura: Gestión de Organizaciones y Usuarios en Grafana] \vspace{2cm} \end{minipage}}
+	\caption{Configuración del control de acceso basado en roles (RBAC) para múltiples clientes.}
+	\label{fig:manual_grafana_admin}
+\end{figure}
 
 \end{document}
