@@ -1,0 +1,436 @@
+% Inicio del preámbulo
+
+\documentclass[12pt, a4paper]{article} %Modifica el tipo de documento y el tamaño de la letra.
+\usepackage[utf8]{inputenc} %Formato UTF-8 para caracteres especiales.
+
+\usepackage[shortlabels]{enumitem}
+\usepackage[spanish,mexico]{babel}
+\usepackage{amsmath,amssymb,amsfonts,latexsym,cancel,bm}
+\usepackage[hidelinks]{hyperref}
+\usepackage{wrapfig}
+\usepackage[rflt]{floatflt}
+\usepackage[pdftex]{graphicx}
+\usepackage{fancyhdr} %Paquete para el header y el formato de la portada. No sugiero borrarlo!
+\usepackage{float}
+\usepackage{longtable,multirow,booktabs}
+\usepackage{wrapfig}
+\usepackage{biblatex}
+\addbibresource{Libros.bib}
+\usepackage{multicol}
+\usepackage{caption}
+\captionsetup[figure]{labelfont={bf}}
+\captionsetup[table]{labelfont={bf}}
+\usepackage[]{sidecap}
+\usepackage{adjustbox}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{lipsum}
+\usepackage[]{xcolor}
+\usepackage{geometry}
+\usepackage[output-decimal-marker = {,}]{siunitx}
+\usepackage{circuitikz}[american]
+\usepackage{csquotes}
+\setlength{\parindent}{0cm}
+\usepackage{svg}
+\usepackage{tabularx}
+\usepackage{pdfpages}
+\usepackage[shortlabels]{enumitem}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,   
+    urlcolor=blue}
+\usepackage{pdflscape}
+\usepackage{minted}
+\renewcommand\listingscaption{Fragmento de código:}
+\usepackage{tabularray}
+%Fin de Préambulo
+
+% Variables del documento
+% Document Variables
+\newcommand{\myMateria}{Ingeniería en Computación}
+\newcommand{\myGrupo}{2}
+\newcommand{\mySemester}{2024-2}
+\newcommand{\MyReport}{Informe de PPS}
+\newcommand{\myUnidad}{Desarrollo de medidor trifásico e implementación de servicios IoT para monitoreo fotovoltaico}
+\newcommand{\myDate}{13 de diciembre de 2024}
+\newcommand{\myName}{Fabrizio Martin Contigiani}
+\newcommand{\myTeacher}{}
+
+%Inicio formato de Página.
+\geometry{
+a4paper,
+left=2cm,
+right=2cm
+}
+\pagestyle{fancy} %Diseño de la página
+
+\fancyhf{}
+\lhead{\includegraphics[height=1.5cm]{imgs/logo_unam.png}}%%LeftHead
+% \chead{\myMateria \\ \MyReport \\ \myUnidad}%%CenterHead
+%\lfoot{USM}
+\rhead{\includegraphics[height=1.5cm]{imgs/logo_fio.png}}%%RightHead
+
+\setlength{\columnsep}{4mm}%Comandos para el formato de la página.
+\setlength{\parindent}{4em}%Sangría al comenzar un nuevo párrafo.
+\setlength{\parindent}{0.5in}
+\setlength{\parindent}{4em}%Sangría al comenzar un nuevo párrafo.
+\setlength{\parskip}{1em}%Distancia entre párrafos.
+\renewcommand{\baselinestretch}{1.0}% Espacio entre línea y línea o interlineado.
+\setlength{\headheight}{50pt}
+\fancyfoot[L]{Fabrizio Martin Contigiani}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+
+%LaTeX te hace el índice automáticamente conforme añades secciones en tu documento.
+\input{portada.tex}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Resumen}
+
+Este informe detalla el diseño y la implementación de un medidor de energía trifásico bidireccional inteligente, orientado al monitoreo de instalaciones fotovoltaicas. La solución emplea una arquitectura dual basada en los microcontroladores STM32F103, responsable de la adquisición de señales y el cálculo preciso de parámetros eléctricos (RMS, potencia activa, factor de potencia), y ESP32-C3, encargado de la conectividad IoT. El sistema incluye un mecanismo de ajuste de rango automático (\textit{auto-ranging}) mediante potenciómetros digitales para optimizar la precisión en diversos niveles de carga. La transmisión de datos se realiza de manera segura hacia un servidor remoto utilizando el protocolo MQTTS con cifrado TLS, permitiendo la visualización y el análisis remoto del flujo energético en tiempo real.
+
+
+\section{Plan de Trabajo Presentado}
+
+\subsection{Objetivos}
+
+Diseñar e implementar el prototipo de un medidor de energía trifásico bidireccional que permita monitorear la cantidad de energía activa recibida desde o entregada hacia la red de distribución en una instalación eléctrica con generación fotovoltaica complementaria. El medidor debe ser capaz de almacenar y publicar datos como ser potencia activa entregada/recibida, niveles de tensión y corriente en cada fase, factor de potencia. El medidor deberá interconectarse con un servidor remoto, mediante el cual podrá publicarse la información para que el usuario del medidor pueda visualizar y analizar los parámetros mencionados a lo largo de diferentes periodos de tiempo a través de una interfaz web.
+
+\subsection{Cronograma y descripción de las actividades}
+
+Considerando que se dedicarán 10 horas semanales a este trabajo, serán requeridas 20 semanas para acumular 200 horas de trabajo, estipuladas para la PPS.
+
+\begin{table}[h]
+	\centering\small
+	\caption{Cronograma tentativo de actividades a realizar en la PPS.}
+	\begin{tblr}{
+		colspec = {l X *{10}{Q[c, 0.9cm]}},
+		hlines, vlines,
+		% row{1} = {font=\bfseries},
+		column{1} = {font=\bfseries},
+		% Definimos el color de las celdas (formato: fila}{columna)
+		cell{2}{3,4} = {bg=azure7},
+		cell{3}{4,5,6,7} = {bg=azure7},
+		cell{4}{8,9,10} = {bg=azure7},
+		cell{5}{9,10,11,12} = {bg=azure7},
+		cell{6}{4,5,6,7,8,9,10,11,12} = {bg=azure7},
+				% Ajuste para el encabezado de doble columna
+				cell{1}{1} = {c=2}{l},
+			}
+		Actividad &                          & Sem. 1-2 & Sem. 3-4 & Sem. 5-6 & Sem. 7-8 & Sem. 9-10 & Sem. 11-12 & Sem. 13-14 & Sem. 15-16 & Sem. 17-18 & Sem. 19-20 \\
+		1         & Análisis del problema    &          &          &          &          &           &            &            &            &            &            \\
+		2         & Diseño                   &          &          &          &          &           &            &            &            &            &            \\
+		3         & Construcción             &          &          &          &          &           &            &            &            &            &            \\
+		4         & Ensayos y puesta a punto &          &          &          &          &           &            &            &            &            &            \\
+		5         & Redacción del informe    &          &          &          &          &           &            &            &            &            &            \\
+	\end{tblr}
+\end{table}
+
+Las actividades a desarrollar en esta PPS serán:
+\begin{enumerate}
+	\item \textbf{Análisis del problema:} Se llevará a cabo el estudio de las soluciones, tanto comerciales como no comerciales, para comprender el funcionamiento de medidores similares, en términos de su operación, los niveles de tensión y corriente que pueden soportar. Además, se analizará la viabilidad de distintas estrategias para el almacenamiento y visualización de datos, incluyendo esquemas centralizados y distribuidos.
+	\item \textbf{Diseño:} El primer paso será caracterizar los parámetros eléctricos a medir y en base a ello seleccionar los componentes adecuados, como ser: microcontrolador, circuitos de alimentación y sensado de tensión y corriente, entre otros. Luego se realizará un esquema del circuito tentativo a partir del cual serán realizadas algunas pruebas de laboratorio para verificar su operación. Con los resultados anteriores se diseñará el circuito definitivo. A partir del mismo se desarrollará el circuito impreso correspondiente, elaborando una lista de componentes/materiales para su compra. El firmware requerido para el medidor será desarrollado en forma paralela a lo mencionado. El firmware permitirá al usuario configurar aspectos básicos del medidor, tales como la conexión a la red local y la introducción de credenciales para el envío de datos al servidor remoto. Para la publicación de los datos medidos, se desarrollará una interfaz web compatible con dispositivos móviles, facilitando la accesibilidad a la información registrada.
+	\item \textbf{Construcción:} En esta etapa se procederá a la fabricación del dispositivo, asegurando su capacidad para realizar las mediciones establecidas. Además, se continuará con el desarrollo del firmware del dispositivo, asegurando que los parámetros eléctricos medidos sean convertidos a un formato compatible para su transmisión al servidor remoto, ya sea para su almacenamiento y/o visualización, y que la comunicación se realiza de manera cifrada protegiendo el acceso a los datos.
+	\item \textbf{Ensayos y puesta a punto:} En esta instancia se realizarán los ensayos necesarios para asegurar que el sistema desarrollado (medidor - interfaz web de usuario - almacenamiento - visualización en servidor remoto) funcione correctamente y de acuerdo a los requerimientos de la empresa. Algunos de los ensayos a realizar serán sobre la exactitud de la medición, el desempeño ante diferentes tipos de cargas, valor mínimo capaz de medir, entre otros.
+	\item \textbf{Redacción del informe:} El informe se realizará a medida que las actividades de la PPS son desarrolladas, a modo de que finalizada la práctica pueda presentarse una versión completa del mismo para que los tutores puedan realizar la corrección.
+\end{enumerate}
+
+\section{Descripción de la Institución / Empresa}
+
+% Espacio para describir la empresa donde se realizó la PPS, su rubro y el área específica de trabajo.
+
+\section{Desarrollo de la Práctica}
+
+
+\subsection{Introducción}
+
+En el contexto actual de transición hacia fuentes de energía renovables, la generación distribuida mediante paneles fotovoltaicos ha cobrado gran relevancia. Para gestionar eficientemente estas instalaciones, es imprescindible contar con herramientas de monitoreo que permitan conocer no solo el consumo de la red, sino también la energía excedente inyectada a la misma.
+
+Este proyecto surge de la necesidad de contar con un medidor trifásico-bidireccional de costo optimizado pero con prestaciones de acordes a los productos presentes en el mercado, capaz de integrarse en ecosistemas IoT modernos. El sistema desarrollado no solo realiza la medición de variables eléctricas fundamentales, sino que también gestiona la conectividad de red de forma dinámica y segura. A lo largo de este informe, se describen las etapas de diseño del hardware, el desarrollo del firmware para la medición de alta fidelidad y la implementación de los servicios de comunicación que garantizan la disponibilidad y protección de la información registrada.
+
+\subsection{Diseño de Hardware}
+
+\subsubsection{Selección de Componentes}
+
+La elección de los microcontroladores centrales se basó en la división de tareas entre la adquisición de datos de alta velocidad y la gestión de comunicaciones:
+
+\begin{itemize}
+	\item \textbf{STM32F103 (Núcleo de Medición):} Seleccionado por su arquitectura ARM Cortex-M3 de 32 bits. Una ventaja tecnológica crucial de este modelo es la integración de dos unidades de ADC independientes. Esta característica permite configurar el modo de \textit{muestreo simultáneo}, capturando en el mismo instante de tiempo la señal de tensión y la de corriente correspondientes a una fase. Esta sincronización es fundamental para evitar errores en el cálculo de la potencia activa, reactiva y el factor de potencia, los cuales son extremadamente sensibles a cualquier desfasaje temporal introducido por el hardware de adquisición.
+	\item \textbf{ESP32-C3 (Gateway IoT):} Seleccionado por su bajo costo, su reducido factor de forma (\textit{footprint}) y su alta disponibilidad en el mercado. Además de su arquitectura RISC-V y periféricos de seguridad, su conectividad nativa Wi-Fi y Bluetooth lo posicionan como una solución óptima para actuar como puente hacia la infraestructura en la nube sin elevar el costo final del dispositivo.
+	\item \textbf{MCP4131 (Potenciómetros Digitales):} Utilizados para implementar el sistema de \textit{auto-ranging} de corriente, permitiendo ajustar la ganancia de los amplificadores de transimpedancia de forma dinámica mediante el bus SPI.
+	\item \textbf{LMV324 (Amplificadores Operacionales):} Seleccionados por su capacidad de salida \textit{Rail-to-Rail} y su bajo costo, utilizados en las etapas de acondicionamiento de señal para escalar y desplazar las lecturas de los sensores al rango dinámico del ADC (0-3.3V).
+	\item \textbf{ZMPT101B (Sensor de Tensión):} Transformador de tensión activo de bajo costo, capaz de medir niveles de tensión AC comerciales (hasta 250V RMS), cumpliendo con los rangos operativos requeridos para el monitoreo residencial e industrial ligero.
+	\item \textbf{SCT-013 (Sensor de Corriente):} Transformador de corriente de núcleo partido (\textit{split-core}) que permite una instalación no invasiva. Su capacidad de medición de hasta 70A RMS se alinea perfectamente con los objetivos de costo y prestaciones definidos por la empresa para este medidor.
+\end{itemize}
+
+\subsubsection{Acondicionamiento de Señal y Auto-ranging}
+
+\subsubsection{Etapa de Comunicaciones y Gateway}
+
+\subsubsection{Diseño del Circuito Impreso (PCB)}
+
+Para la integración física de los componentes y la validación del prototipo, se diseñó un circuito impreso (PCB) utilizando la herramienta de código abierto \textbf{KiCad}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura: Esquema electrónico en KiCad] \vspace{2cm} \end{minipage}}
+	\caption{Diagrama esquemático del sistema de medición y gateway.}
+	\label{fig:pcb_schematic}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura: Diseño del Layout de la PCB] \vspace{2cm} \end{minipage}}
+	\caption{Disposición de componentes y ruteo de pistas en KiCad.}
+	\label{fig:pcb_layout}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura: Vista 3D de la placa finalizada] \vspace{2cm} \end{minipage}}
+	\caption{Renderizado 3D del prototipo para validación mecánica.}
+	\label{fig:pcb_3d}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Fotografía: PCB físico ensamblado y en funcionamiento] \vspace{2cm} \end{minipage}}
+	\caption{Implementación física del prototipo final sobre circuito impreso.}
+	\label{fig:pcb_fisico}
+\end{figure}
+
+\subsection{Caracterización y Ensayo de Sensores}
+
+El desempeño del medidor está íntimamente ligado a la respuesta de los sensores de tensión y corriente. Por ello, se realizó una etapa de caracterización de los siguientes componentes:
+
+\begin{itemize}
+	\item \textbf{Transformador de Tensión ZMPT101B:} Se realizaron ensayos de linealidad para determinar la relación entre la tensión de red y la salida del sensor, así como la medición del retardo de fase introducido por el circuito de acondicionamiento activo del módulo.
+	\item \textbf{Sensor de Corriente SCT-013:} Se evaluó la respuesta del sensor en un amplio rango de corrientes (hasta 70 A), analizando la linealidad de la tensión de salida respecto a la corriente primaria y el desfase angular, el cual es crítico para el cálculo preciso de la potencia activa.
+\end{itemize}
+
+\subsubsection{Ensayos de Linealidad y Retardo de Fase}
+
+\subsection{Implementación del Firmware}
+
+
+
+\subsubsection{Cómputo de Variables Eléctricas (STM32F103)}
+
+El núcleo de medición se basa en un STM32F103 que ejecuta un bucle de procesamiento en tiempo real. Los aspectos más destacados de su implementación incluyen:
+
+\begin{itemize}
+	\item \textbf{Muestreo Sincronizado:} Se utiliza el temporizador \texttt{TIM3} para disparar la conversión del ADC a una frecuencia de 5 kHz por canal. La adquisición se realiza mediante DMA para minimizar la carga de la CPU.
+	\item \textbf{Sincronización de Fase:} El sistema detecta los cruces por cero de la tensión en la fase 1 (utilizando un esquema de histéresis) para definir el inicio y fin de cada ciclo de red (50 Hz). Esto permite realizar integraciones precisas sobre periodos completos.
+	\item \textbf{Cálculos Eléctricos:} Para cada ciclo, se calculan los valores eficaces (RMS) y la potencia activa mediante la suma de los productos instantáneos de tensión y corriente.
+	\item \textbf{Sistema de Rango Automático (\textit{Auto-ranging}):} Mediante potenciómetros digitales MCP4131 controlados por SPI, el firmware monitorea los valores pico de corriente. Si la señal se aproxima a la saturación o es demasiado pequeña, el sistema ajusta dinámicamente la ganancia del amplificador de transimpedancia, garantizando la máxima resolución del ADC en todo el rango de operación.
+\end{itemize}
+
+\subsubsection{Gateway IoT y Seguridad (ESP32-C3)}
+
+El ESP32-C3 actúa como puente entre el hardware de medición y la infraestructura en la nube. Sus funciones principales son:
+
+\begin{itemize}
+	\item \textbf{Gestión de Conectividad:} Utiliza la librería \textit{WiFiManager} para permitir al usuario configurar las credenciales de red mediante un portal cautivo, evitando la necesidad de hardcodear datos de acceso.
+	\item \textbf{Seguridad en la Transmisión:} La comunicación con el servidor se realiza mediante el protocolo MQTTS. Se integra el certificado raíz de \textit{Let's Encrypt} para validar la identidad del broker y establecer un túnel cifrado TLS 1.2.
+	\item \textbf{Intercambio de Datos:} Recibe tramas JSON desde el STM32 vía UART, las procesa para añadir metadatos de diagnóstico y las publica en tópicos MQTT estructurados por la dirección MAC del dispositivo.
+	\item \textbf{Diagnóstico Local:} Implementa un sistema de \textit{logging} persistente en la memoria flash (\textit{LittleFS}), accesible a través de una interfaz web interna para tareas de mantenimiento y depuración.
+\end{itemize}
+
+\subsubsection{Portal Captivo y Monitoreo Local}
+
+El dispositivo implementa una interfaz de configuración y monitoreo local accesible vía Wi-Fi, lo que facilita la puesta en marcha y el diagnóstico en campo sin necesidad de herramientas externas:
+
+\begin{itemize}
+	\item \textbf{Portal Captivo de Configuración:} Utilizando la librería \textit{WiFiManager}, el ESP32 es capaz de detectar la falta de conectividad y activar un modo de Punto de Acceso (AP) con un portal captivo. Este portal permite al usuario seleccionar la red Wi-Fi local e ingresar las credenciales sin que estas queden grabadas de forma estática en el código fuente. La interfaz ha sido personalizada con el logotipo del proyecto y un menú simplificado.
+	\item \textbf{Panel de Monitoreo y Herramientas:} Una vez establecida la conexión, el gateway sirve una interfaz web que permite visualizar el estado de la conexión MQTT, las versiones de firmware de ambos microcontroladores y realizar acciones de mantenimiento como el reinicio remoto del dispositivo.
+	\item \textbf{Visualización de Logs:} A través de la ruta \texttt{/logs}, el servidor web del ESP32 entrega el contenido del archivo de registro almacenado en \textit{LittleFS}, permitiendo una depuración rápida de problemas de red o comunicación con el STM32.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Portal Captivo WiFiManager] \vspace{2cm} \end{minipage}}
+	\caption{Interfaz del portal captivo para la configuración de red Wi-Fi.}
+	\label{fig:portal_captivo}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Interfaz Web de Monitoreo y Logs] \vspace{2cm} \end{minipage}}
+	\caption{Portal web de monitoreo local y diagnóstico del sistema.}
+	\label{fig:web_monitoreo}
+\end{figure}
+
+
+
+\subsection{Interfaz de Usuario y Almacenamiento Remoto}
+
+\subsubsection{Selección y Justificación de la Arquitectura}
+
+Previo a la implementación de los servicios remotos, se realizó un análisis de las posibles arquitecturas para el almacenamiento y visualización de datos:
+
+\begin{itemize}
+	\item \textbf{Descentralizada:} Procesamiento y almacenamiento local en el dispositivo (ej. mediante una SBC). Si bien ofrece autonomía, incrementa significativamente el costo del hardware y dificulta el acceso remoto en entornos sin IP pública.
+	\item \textbf{Mixta:} Almacenamiento local con acceso remoto vía túneles (SSH/VPN). Requiere infraestructura a medida y mantenimiento complejo.
+	\item \textbf{Centralizada (Seleccionada):} Los datos se envían a un servidor remoto (VPS o Nube). Esta opción optimiza el costo del hardware del medidor y centraliza el mantenimiento, facilitando la escalabilidad del sistema.
+\end{itemize}
+
+En cuanto a la gestión de los servicios, se evaluaron las opciones \textit{Fully Managed} (servicios en la nube de terceros) frente a \textit{Self-Managed} (servidores propios). Para este prototipo, se optó por una arquitectura \textbf{Centralizada y Self-Managed}, desplegando microservicios mediante contenedores \textbf{Docker} en un VPS. Esta elección permite un control total sobre la soberanía de los datos y una reducción de costos operativos durante la etapa de desarrollo.
+
+No obstante, cabe destacar que la implementación definitiva en un entorno de producción será responsabilidad de la empresa. Será la organización quien, evaluando los recursos disponibles y la inversión proyectada, determine la arquitectura final. Esto incluye la selección de los mecanismos de resguardo y seguridad para la base de datos —la cual puede contener información sensible de los clientes—, garantizando así el cumplimiento de los estándares de protección de datos requeridos por la institución.
+
+La arquitectura de servicios remotos se diseñó bajo un enfoque de microservicios, utilizando contenedores \textbf{Docker} para garantizar la portabilidad y facilitar el despliegue en un entorno de Servidor Privado Virtual (VPS).
+
+\subsubsection{Infraestructura en la Nube y Dockerización}
+
+El despliegue se orquestó mediante \textbf{Docker Compose}, integrando los siguientes servicios clave para el funcionamiento del sistema:
+
+\begin{itemize}
+	\item \textbf{SWAG (Nginx + Let's Encrypt):} Actúa como servidor proxy inverso y gestiona automáticamente los certificados SSL/TLS, permitiendo el acceso seguro vía HTTPS a todos los servicios internos.
+	\item \textbf{Mosquitto (MQTT Broker):} Centraliza la recepción de los mensajes enviados por los dispositivos en campo. Se configuró para soportar conexiones cifradas (\textit{MQTTS}) utilizando los certificados generados por SWAG.
+	\item \textbf{pgAdmin:} Herramienta de gestión gráfica para la base de datos, facilitando las tareas de administración y consulta de datos.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Mensajes MQTT en Mosquitto / Cliente MQTT] \vspace{2cm} \end{minipage}}
+	\caption{Ejemplo de trama JSON recibida en el broker MQTT.}
+	\label{fig:mqtt_messages}
+\end{figure}
+
+\subsubsection{Gestión de Datos con TimescaleDB}
+
+Para la persistencia de la información, se utilizó \textbf{TimescaleDB}, una extensión de PostgreSQL optimizada para datos de series temporales.
+
+\begin{itemize}
+	\item \textbf{Hypertables:} Los datos se almacenan en \textit{hypertables}, lo que permite un particionamiento automático basado en el tiempo, mejorando significativamente el rendimiento de las consultas y la inserción de grandes volúmenes de datos.
+	\item \textbf{Políticas de Compresión:} Se implementó una política de compresión automática para datos con una antigüedad superior a los 90 días. Esto permite reducir significativamente la huella de almacenamiento en el VPS sin sacrificar la capacidad de realizar consultas sobre el histórico de mediciones.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Estructura de la tabla sensor\_data en pgAdmin] \vspace{2cm} \end{minipage}}
+	\caption{Esquema de la base de datos optimizado para series temporales.}
+	\label{fig:db_schema}
+\end{figure}
+
+\subsubsection{Orquestación de Flujos con Node-RED}
+
+\textbf{Node-RED} cumple la función de motor de reglas y pegamento lógico del sistema (\textit{middleware}). Sus responsabilidades incluyen:
+
+\begin{itemize}
+	\item \textbf{Suscripción MQTT:} Escucha los tópicos donde los medidores publican su información.
+	\item \textbf{Procesamiento y Almacenamiento:} Valida las tramas JSON recibidas y realiza la inserción de los datos en la base de datos TimescaleDB.
+	\item \textbf{Lógica de Alerta:} Permite configurar flujos condicionales para detectar anomalías o estados críticos en las instalaciones.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Flujos de Node-RED (MQTT a DB)] \vspace{2cm} \end{minipage}}
+	\caption{Lógica de procesamiento de datos implementada en Node-RED.}
+	\label{fig:nodered_flows}
+\end{figure}
+
+\subsubsection{Visualización con Grafana}
+
+La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo una visualización dinámica y en tiempo real de los parámetros eléctricos:
+
+\begin{itemize}
+	\item \textbf{Dashboard Principal:} Muestra variables críticas como potencia activa total, tensiones de fase, corrientes y energía acumulada.
+	\item \textbf{Análisis Histórico:} Permite al usuario comparar consumos y generación fotovoltaica a lo largo de diferentes períodos de tiempo (día, semana, mes).
+	\item \textbf{Responsive Design:} El dashboard es accesible desde navegadores web y dispositivos móviles, adaptándose automáticamente al tamaño de pantalla.
+	\item \textbf{Gestión de Usuarios y Control de Acceso:} Se utiliza el sistema de autenticación de Grafana para gestionar diferentes niveles de permisos. Esta capacidad es clave para la empresa, ya que permite aislar los dashboards de cada cliente, asegurando que cada usuario final visualice únicamente la información perteneciente a su instalación fotovoltaica.
+\end{itemize}
+
+\begin{figure}[H]
+	\centering
+	\fbox{\begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Dashboard Principal de Grafana] \vspace{2cm} \end{minipage}}
+	\caption{Interfaz de usuario para el monitoreo de la instalación trifásica.}
+	\label{fig:grafana_dashboard}
+\end{figure}
+
+\subsection{Ensayos y Resultados}
+
+\subsubsection{Pruebas de Exactitud y Linealidad}
+
+\subsubsection{Ensayos de Conectividad y Robustez del Sistema IoT}
+
+\section{Vinculación de las tareas/proyectos con Asignaturas de la Carrera}
+
+
+El desarrollo de este proyecto integra conocimientos de diversas áreas de la Ingeniería en Computación, permitiendo la aplicación práctica de conceptos teóricos en un entorno de diseño real:
+
+\begin{itemize}
+	\item \textbf{Sistemas Embebidos / Arquitectura de Computadoras / Procesamiento de Señales:} El uso de microcontroladores STM32 y ESP32 requirió el manejo de periféricos avanzados como ADC con DMA, temporizadores para muestreo preciso e interrupciones. La implementación de algoritmos para el cálculo de RMS y potencia activa se vincula directamente con el procesamiento digital de señales.
+	\item \textbf{Redes / Internet de las Cosas:} La implementación de la pila IoT involucró el uso de protocolos de transporte como TCP/IP y protocolos de aplicación como MQTT. La seguridad fue un factor clave, aplicando cifrado TLS para proteger la integridad de los datos en un entorno conectado.
+	\item \textbf{Circuitos Eléctricos:} El cálculo de parámetros como el valor eficaz (RMS) de tensión y corriente, la potencia activa mediante integración numérica y el factor de potencia se basa directamente en los fundamentos teóricos de esta asignatura.
+	\item \textbf{Programación / Algoritmos y Estructuras de Datos:} El desarrollo del firmware en C/C++ exigió la aplicación de buenas prácticas de programación, gestión de memoria eficiente y el uso de protocolos de comunicación serial.
+\end{itemize}
+
+
+\section{Equipamiento y Herramientas utilizadas}
+
+Para la realización de esta práctica se utilizaron las siguientes herramientas y componentes tecnológicos:
+
+\begin{itemize}
+	\item \textbf{Instrumental de Laboratorio (Proporcionado por la Universidad):}
+	      \begin{itemize}
+		      \item \textbf{Osciloscopio Digital:} Utilizado para la visualización de las formas de onda de tensión y corriente, verificación de la integridad de las señales acondicionadas y medición precisa de los tiempos de retardo de fase.
+		      \item \textbf{Multímetro Digital:} Empleado para la calibración de los sensores y la verificación de niveles de tensión en las etapas de alimentación y acondicionamiento.
+		      \item \textbf{Fuente de Alimentación Regulada:} Utilizada para el suministro de energía a las etapas analógicas y digitales durante las pruebas de prototipado.
+		      \item \textbf{Estación de Soldadura y Herramientas de Prototipado:} Para el montaje del hardware en placas de desarrollo y circuitos impresos experimentales.
+	      \end{itemize}
+	\item \textbf{Componentes de Hardware del Sistema:}
+	      \begin{itemize}
+		      \item Microcontroladores STM32F103 (medición) y ESP32-C3 (comunicaciones).
+		      \item Potenciómetros digitales MCP4131 y amplificadores operacionales LMV324.
+		      \item Sensores de corriente SCT-013 y transformadores ZMPT101B.
+	      \end{itemize}
+	\item \textbf{Entornos de Desarrollo y Software:}
+	      \begin{itemize}
+		      \item Visual Studio Code (con extensiones STM32 y PlatformIO).
+		      \item \textbf{KiCad EDA:} Para el diseño del esquemático y el ruteo del circuito impreso.
+		      \item Docker y Docker Compose para el despliegue de la infraestructura remota.
+		      \item Grafana y Node-RED para la visualización y orquestación de datos.
+	      \end{itemize}
+\end{itemize}
+
+
+\section{Conclusiones}
+
+La realización de esta Práctica Profesional Supervisada permitió consolidar los conocimientos adquiridos durante la carrera mediante el desarrollo de un sistema embebido complejo que integra hardware, firmware y servicios de conectividad. El diseño basado en una arquitectura dual (STM32 + ESP32) demostró ser una solución robusta y eficiente, permitiendo delegar las tareas críticas de medición a un microcontrolador dedicado con capacidades de procesamiento en tiempo real, mientras que la gestión de la conectividad y la seguridad IoT fue resuelta por un procesador especializado en redes.
+
+La implementación del sistema de ajuste automático de rango (\textit{auto-ranging}) representó uno de los mayores desafíos y logros técnicos del proyecto. Este mecanismo permitió extender significativamente el rango dinámico del medidor, garantizando la exactitud en mediciones de hasta \SI{70}{\ampere} RMS. Esto lo posiciona como una solución sumamente versátil para el monitoreo de instalaciones residenciales y comerciales donde las variaciones de carga y generación pueden ser muy amplias a lo largo del día.
+
+Asimismo, el enfoque centrado en la seguridad mediante el uso de protocolos cifrados (MQTTS/TLS) y la flexibilidad otorgada por la gestión dinámica de credenciales WiFi posicionan a este prototipo como una base sólida para un producto comercial escalable y confiable.
+
+Como trabajo futuro, se contempla la posibilidad de migrar la etapa de adquisición de señales hacia circuitos integrados especializados en medición de energía (\textit{AFE - Analog Front End}) como los de la familia MCP3903/MCP3913. La utilización de estos integrados simplificaría notablemente el diseño del hardware al integrar convertidores de alta resolución y funciones de cálculo nativas, facilitando la producción a escala del dispositivo. Cabe destacar que, si bien se evaluó esta opción, se optó por la solución discreta actual basada en el STM32 debido a la escasa disponibilidad de dichos integrados especializados al momento de la ejecución del proyecto.
+
+
+\newpage
+\nocite{*}
+\printbibliography[heading=bibnumbered,title=Bibliografía]
+
+\appendix
+
+\section{Código Fuente y Repositorios}
+
+Todo el material desarrollado para este proyecto, incluyendo el firmware de los microcontroladores, la configuración de la infraestructura de servicios y los archivos de diseño del hardware, se encuentra alojado en repositorios públicos de GitHub. La organización del código sigue una estructura modular para facilitar su mantenimiento y escalabilidad:
+
+\begin{itemize}
+    \item \textbf{Firmware STM32 (Núcleo de Medición):} Contiene la lógica de adquisición ADC, procesamiento de señales y algoritmos de cálculo RMS. \\ \url{https://github.com/fabcontigiani/stm32-pps-enerlab}
+    
+    \item \textbf{Firmware ESP32 (Gateway IoT):} Incluye la gestión de conectividad WiFiManager, comunicación MQTTS, portal cautivo y diagnósticos locales. \\ \url{https://github.com/fabcontigiani/esp32-pps-enerlab}
+    
+    \item \textbf{Infraestructura Docker (Servicios Remotos):} Orquestación de contenedores para TimescaleDB, Grafana, Node-RED y Mosquitto. \\ \url{https://github.com/fabcontigiani/docker-pps-enerlab}
+    
+    \item \textbf{Proyecto KiCad (Hardware y PCB):} Archivos de diseño esquemático, ruteo del PCB y modelos 3D del hardware. \\ \url{https://github.com/fabcontigiani/kicad-pps-enerlab}
+\end{itemize}
+\section{Manual de Usuario}
+
+\end{document}

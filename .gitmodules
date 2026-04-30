@@ -1,0 +1,9 @@
+[submodule "src/stm32"]
+	path = src/stm32
+	url = https://github.com/fabcontigiani/stm32-pps-enerlab.git
+[submodule "src/esp32"]
+	path = src/esp32
+	url = https://github.com/fabcontigiani/esp32-pps-enerlab.git
+[submodule "src/docker"]
+	path = src/docker
+	url = git@github.com:fabcontigiani/docker-pps-enerlab.git
