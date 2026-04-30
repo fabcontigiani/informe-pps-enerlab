@@ -141,7 +141,7 @@ Las actividades a desarrollar en esta PPS serán:
 	\item \textbf{Redacción del informe:} El informe se realizará a medida que las actividades de la PPS son desarrolladas, a modo de que finalizada la práctica pueda presentarse una versión completa del mismo para que los tutores puedan realizar la corrección.
 \end{enumerate}
 
-\section{Descripción de la Institución / Empresa}
+% \section{Descripción de la Institución / Empresa}
 
 % Espacio para describir la empresa donde se realizó la PPS, su rubro y el área específica de trabajo.
 
@@ -378,7 +378,7 @@ El desarrollo de este proyecto integra conocimientos de diversas áreas de la In
 Para la realización de esta práctica se utilizaron las siguientes herramientas y componentes tecnológicos:
 
 \begin{itemize}
-	\item \textbf{Instrumental de Laboratorio (Proporcionado por la Universidad):}
+	\item \textbf{Instrumental de Laboratorio:}
 	      \begin{itemize}
 		      \item \textbf{Osciloscopio Digital:} Utilizado para la visualización de las formas de onda de tensión y corriente, verificación de la integridad de las señales acondicionadas y medición precisa de los tiempos de retardo de fase.
 		      \item \textbf{Multímetro Digital:} Empleado para la calibración de los sensores y la verificación de niveles de tensión en las etapas de alimentación y acondicionamiento.
@@ -423,13 +423,13 @@ Como trabajo futuro, se contempla la posibilidad de migrar la etapa de adquisici
 Todo el material desarrollado para este proyecto, incluyendo el firmware de los microcontroladores, la configuración de la infraestructura de servicios y los archivos de diseño del hardware, se encuentra alojado en repositorios públicos de GitHub. La organización del código sigue una estructura modular para facilitar su mantenimiento y escalabilidad:
 
 \begin{itemize}
-    \item \textbf{Firmware STM32 (Núcleo de Medición):} Contiene la lógica de adquisición ADC, procesamiento de señales y algoritmos de cálculo RMS. \\ \url{https://github.com/fabcontigiani/stm32-pps-enerlab}
-    
-    \item \textbf{Firmware ESP32 (Gateway IoT):} Incluye la gestión de conectividad WiFiManager, comunicación MQTTS, portal cautivo y diagnósticos locales. \\ \url{https://github.com/fabcontigiani/esp32-pps-enerlab}
-    
-    \item \textbf{Infraestructura Docker (Servicios Remotos):} Orquestación de contenedores para TimescaleDB, Grafana, Node-RED y Mosquitto. \\ \url{https://github.com/fabcontigiani/docker-pps-enerlab}
-    
-    \item \textbf{Proyecto KiCad (Hardware y PCB):} Archivos de diseño esquemático, ruteo del PCB y modelos 3D del hardware. \\ \url{https://github.com/fabcontigiani/kicad-pps-enerlab}
+	\item \textbf{Firmware STM32 (Núcleo de Medición):} Contiene la lógica de adquisición ADC, procesamiento de señales y algoritmos de cálculo RMS. \\ \url{https://github.com/fabcontigiani/stm32-pps-enerlab}
+
+	\item \textbf{Firmware ESP32 (Gateway IoT):} Incluye la gestión de conectividad WiFiManager, comunicación MQTTS, portal cautivo y diagnósticos locales. \\ \url{https://github.com/fabcontigiani/esp32-pps-enerlab}
+
+	\item \textbf{Infraestructura Docker (Servicios Remotos):} Orquestación de contenedores para TimescaleDB, Grafana, Node-RED y Mosquitto. \\ \url{https://github.com/fabcontigiani/docker-pps-enerlab}
+
+	\item \textbf{Proyecto KiCad (Hardware y PCB):} Archivos de diseño esquemático, ruteo del PCB y modelos 3D del hardware. \\ \url{https://github.com/fabcontigiani/kicad-pps-enerlab}
 \end{itemize}
 \section{Manual de Usuario}
 
