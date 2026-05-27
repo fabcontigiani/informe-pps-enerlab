@@ -6,7 +6,8 @@
 \usepackage[shortlabels]{enumitem}
 \usepackage[spanish,mexico]{babel}
 \usepackage{amsmath,amssymb,amsfonts,latexsym,cancel,bm}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
 \usepackage{wrapfig}
 \usepackage[rflt]{floatflt}
 \usepackage[pdftex]{graphicx}
@@ -37,10 +38,6 @@
 \usepackage{tabularx}
 \usepackage{pdfpages}
 \usepackage[shortlabels]{enumitem}
-\hypersetup{
-  colorlinks=true,
-  linkcolor=black,
-urlcolor=blue}
 \usepackage{pdflscape}
 \usepackage{minted}
 \renewcommand\listingscaption{Fragmento de código:}
@@ -152,7 +149,7 @@ Las actividades a desarrollar en esta PPS serán:
 
 En el contexto actual de transición hacia fuentes de energía renovables, la generación distribuida mediante paneles fotovoltaicos ha cobrado gran relevancia. Para gestionar eficientemente estas instalaciones, es imprescindible contar con herramientas de monitoreo que permitan conocer no solo el consumo de la red, sino también la energía excedente inyectada a la misma.
 
-Este proyecto surge de la necesidad de contar con un medidor trifásico-bidireccional de costo optimizado pero con prestaciones de acordes a los productos presentes en el mercado, capaz de integrarse en ecosistemas IoT modernos. El sistema desarrollado no solo realiza la medición de variables eléctricas fundamentales, sino que también gestiona la conectividad de red de forma dinámica y segura. Una de las mayores ventajas tecnológicas de este diseño es su capacidad para medir cargas muy bajas (inferiores a \SI{500}{\watt}) con gran precisión, sin sacrificar la capacidad de medir potencias elevadas. Esta característica marca una diferencia fundamental respecto a dispositivos comerciales de referencia \cite{shelly_pro_3em}, los cuales suelen aplicar un umbral de banda muerta (\textit{deadband}) en consumos bajos, lo que resulta en la omisión de datos de consumo reales cuando la carga es reducida. En contraste, el presente diseño utiliza una estrategia de \textit{auto-ranging} que optimiza el rango dinámico del ADC en todo momento, garantizando la visibilidad completa del flujo energético. A lo largo de este informe, se describen las etapas de diseño del hardware, el desarrollo del firmware para la medición de alta fidelidad y la implementación de los servicios de comunicación que garantizan la disponibilidad y protección de la información registrada.
+Este proyecto surge de la necesidad de contar con un medidor trifásico-bidireccional de costo optimizado pero con prestaciones de acordes a los productos presentes en el mercado, capaz de integrarse en ecosistemas IoT modernos. El sistema desarrollado no solo realiza la medición de variables eléctricas fundamentales, sino que también gestiona la conectividad de red de forma dinámica y segura. Una de las mayores ventajas tecnológicas de este diseño es su capacidad para medir cargas muy bajas (inferiores a \SI{500}{\watt}) con gran precisión, sin sacrificar la capacidad de medir potencias elevadas. Esta característica marca una diferencia fundamental respecto a dispositivos comerciales de referencia \cite{shelly_pro_3em}, los cuales suelen aplicar un umbral de banda muerta (\textit{deadband}) en consumos bajos, lo que resulta en la omisión de datos de consumo reales cuando la carga es reducida. En contraste, el presente diseño utiliza una estrategia de \textit{auto-ranging} que optimiza el rango dinámico del ADC en todo momento, permitiendo la visibilidad del flujo energético incluso con cargas muy bajas sin sacrificar la capacidad de medir potencias elevadas. A lo largo de este informe, se describen las etapas de diseño, construcción, ensayos y puesta a punto del sistema desarrollado.
 
 El dispositivo se enfoca específicamente en la medición de la \textbf{carga neta} (\textit{net load}), posicionándose físicamente entre la red eléctrica de distribución y la instalación interna del usuario (ya sea un hogar, oficina o industria). Esta ubicación estratégica, como se ilustra en la Figura \ref{fig:net_load_concept}, permite monitorear de forma bidireccional el flujo energético, discriminando entre el consumo de energía demandado a la red y la entrega de excedentes generados localmente hacia la misma.
 
@@ -178,11 +175,12 @@ La elección de los microcontroladores centrales se basó en la división de tar
   \item \textbf{ZMPT101B (Sensor de Tensión):} Transformador de tensión activo de bajo costo, capaz de medir niveles de tensión AC comerciales (hasta 250V RMS), cumpliendo con los rangos operativos requeridos para el monitoreo residencial e industrial ligero \cite{zmpt101b_ds}.
   \item \textbf{SCT-013 (Sensor de Corriente):} Transformador de corriente de núcleo partido (\textit{split-core}) que permite una instalación no invasiva \cite{sct013_ds}. Su capacidad de medición de hasta 70A RMS se alinea perfectamente con los objetivos de costo y prestaciones definidos por la empresa para este medidor.
 
-  \item \textbf{HLK-5M05 (Etapa de Alimentación Interna):} El dispositivo integra la fuente conmutada \textbf{HLK-5M05} \cite{hlk5m05_ds} que permite su funcionamiento autónomo mediante la toma de energía directa de la Fase~1 de la red eléctrica, simplificando significativamente el proceso de instalación al prescindir de fuentes externas.
+  \item \textbf{HLK-5M05 (Etapa de Alimentación Interna):} El dispositivo integra una fuente conmutada \cite{hlk5m05_ds} que permite su funcionamiento autónomo mediante la toma de energía directa de la Fase~1 de la red eléctrica, simplificando significativamente el proceso de instalación al prescindir de fuentes externas.
 \end{itemize}
 
 \subsubsection{Acondicionamiento de Señal y Auto-ranging}
 
+La captura del panel de control de la base de datos en pgAdmin, con una consulta de ejemplo, se muestra en la figura~\ref{fig:db_schema}.
 Para maximizar la precisión en un amplio espectro de potencias, se implementó una etapa de acondicionamiento de señal activa con capacidad de ajuste de rango automático (\textit{auto-ranging}). Esta estrategia es fundamental para resolver el compromiso tecnológico entre la resolución necesaria para medir cargas pequeñas y el rango dinámico requerido para potencias elevadas.
 
 El sistema utiliza potenciómetros digitales \textbf{MCP4131} \cite{mcp4131_ds} integrados en la etapa de realimentación de los amplificadores operacionales \textbf{LMV324}. El firmware del STM32F103 monitorea continuamente los valores de pico de la señal de corriente en cada fase. Si la amplitud de la señal cae por debajo de un umbral predefinido, el microcontrolador incrementa la ganancia del amplificador mediante el bus SPI, permitiendo que señales pequeñas ocupen una mayor porción del rango del ADC (\SI{0}{\volt} a \SI{3.3}{\volt}). Inversamente, ante un incremento de la carga que amenace con saturar el ADC, el sistema reduce la ganancia de forma inmediata para evitar el truncamiento (\textit{clipping}) de la forma de onda.
@@ -394,11 +392,11 @@ Previo a la implementación de los servicios remotos, se realizó un análisis d
   \item \textbf{Centralizada (Seleccionada):} Los datos se envían a un servidor remoto (VPS o Nube). Esta opción optimiza el costo del hardware del medidor y centraliza el mantenimiento, facilitando la escalabilidad del sistema.
 \end{itemize}
 
-En cuanto a la gestión de los servicios, se evaluaron las opciones \textit{Fully Managed} (servicios en la nube de terceros) frente a \textit{Self-Managed} (servidores propios). Para este prototipo, se optó por una arquitectura \textbf{Centralizada y Self-Managed}, desplegando microservicios mediante contenedores \textbf{Docker} en un VPS. Esta elección permite un control total sobre la soberanía de los datos y una reducción de costos operativos durante la etapa de desarrollo.
+En cuanto a la gestión de los servicios, se evaluaron las opciones \textit{Fully Managed} (servicios en la nube de terceros) frente a \textit{Self-Managed} (servidores propios). Para este prototipo, se optó por una arquitectura Centralizada y Self-Managed, desplegando microservicios mediante contenedores Docker en un VPS. Esta elección permite un control total sobre la soberanía de los datos y una reducción de costos operativos durante la etapa de desarrollo.
 
 No obstante, cabe destacar que la implementación definitiva en un entorno de producción será responsabilidad de la empresa. Será la organización quien, evaluando los recursos disponibles y la inversión proyectada, determine la arquitectura final. Esto incluye la selección de los mecanismos de resguardo y seguridad para la base de datos —la cual puede contener información sensible de los clientes—, garantizando así el cumplimiento de los estándares de protección de datos requeridos por la institución.
 
-La arquitectura de servicios remotos se diseñó bajo un enfoque de microservicios, utilizando contenedores \textbf{Docker} para garantizar la portabilidad y facilitar el despliegue en un entorno de Servidor Privado Virtual (VPS).
+La arquitectura de servicios remotos se diseñó bajo un enfoque de microservicios, utilizando contenedores Docker para garantizar la portabilidad y facilitar el despliegue en un entorno de Servidor Privado Virtual (VPS).
 
 \subsubsection{Infraestructura en la Nube y Dockerización}
 
@@ -419,13 +417,12 @@ Para la persistencia de la información, se utilizó \textbf{TimescaleDB} \cite{
   \item \textbf{Hypertables:} Los datos se almacenan en \textit{hypertables}, lo que permite un particionamiento automático basado en el tiempo, mejorando significativamente el rendimiento de las consultas y la inserción de grandes volúmenes de datos.
   \item \textbf{Políticas de Compresión:} Se implementó una política de compresión automática para datos con una antigüedad superior a los 90 días. Esto permite reducir significativamente la huella de almacenamiento en el VPS sin sacrificar la capacidad de realizar consultas sobre el histórico de mediciones.
 \end{itemize}
+El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se demuestra una consulta SQL.
 
 \begin{figure}[H]
   \centering
-  \fbox{
-    \begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Estructura de la tabla sensor\_data en pgAdmin] \vspace{2cm}
-  \end{minipage}}
-  \caption{Esquema de la base de datos optimizado para series temporales.}
+  \includegraphics[width=\textwidth]{imgs/pgadmin.png}
+  \caption{Captura del panel de control de la base de datos en pgAdmin con una consulta de ejemplo.}
   \label{fig:db_schema}
 \end{figure}
 
@@ -459,10 +456,20 @@ La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo 
 
 \begin{figure}[H]
   \centering
-  \fbox{
-    \begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Captura de pantalla: Dashboard Principal de Grafana] \vspace{2cm}
-  \end{minipage}}
-  \caption{Interfaz de usuario para el monitoreo de la instalación trifásica.}
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{imgs/dashboard1.png}
+    \caption{Vista general del dashboard.}
+    \label{fig:grafana_dashboard_1}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{imgs/dashboard2.png}
+    \caption{Panel de análisis histórico y métricas.}
+    \label{fig:grafana_dashboard_2}
+  \end{subfigure}
+  \caption{Interfaz de usuario para el monitoreo de la instalación trifásica (capturas del dashboard de Grafana).}
   \label{fig:grafana_dashboard}
 \end{figure}
 
@@ -474,21 +481,19 @@ En esta sección se presenta la materialización física del sistema, desde el e
 
 \begin{figure}[H]
   \centering
-  \fbox{
-    \begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Fotografía: PCB físico ensamblado y en funcionamiento] \vspace{2cm}
-  \end{minipage}}
+  \includegraphics[width=0.85\textwidth]{imgs/pcb_ensamblado.jpeg}
   \caption{Implementación física del prototipo final sobre circuito impreso.}
   \label{fig:pcb_fisico}
 \end{figure}
 
-\begin{figure}[H]
-  \centering
-  \fbox{
-    \begin{minipage}{0.8\textwidth} \centering \vspace{3cm} [Fotografía: Prototipo completo en su presentación final] \vspace{3cm}
-  \end{minipage}}
-  \caption{Prototipo final del medidor trifásico bidireccional listo para su instalación.}
-  \label{fig:prototipo_final}
-\end{figure}
+% \begin{figure}[H]
+%   \centering
+%   \fbox{
+%     \begin{minipage}{0.8\textwidth} \centering \vspace{3cm} [Fotografía: Prototipo completo en su presentación final] \vspace{3cm}
+%   \end{minipage}}
+%   \caption{Prototipo final del medidor trifásico bidireccional listo para su instalación.}
+%   \label{fig:prototipo_final}
+% \end{figure}
 
 \begin{table}[htbp]
   \centering
@@ -508,13 +513,13 @@ En esta sección se presenta la materialización física del sistema, desde el e
     Fuente de alimentación switching HLK-5M05                   & 1        \\
     Varistor de protección                                       & 1        \\
     Fusible 5$\times$20\,mm con portafusible                     & 1        \\
-    Resistor 820\,k$\Omega$                                      & 3        \\
-    Resistor 33\,$\Omega$                                        & 3        \\
-    Resistor 10\,k$\Omega$                                       & 6        \\
-    Resistor 3{,}3\,k$\Omega$                                    & 3        \\
-    Resistor 5{,}1\,k$\Omega$                                    & 2        \\
-    Capacitor 100\,nF                                            & 5        \\
-    Capacitor electrolítico 10\,$\mu$F                           & 1        \\
+    Resistor 820\,k$\Omega$ 1/4\unit{\W}                                      & 3        \\
+    Resistor 33\,$\Omega$ 1/4\unit{\W}                                        & 3        \\
+    Resistor 10\,k$\Omega$ 1/4\unit{\W}                                       & 6        \\
+    Resistor 3{,}3\,k$\Omega$ 1/4\unit{\W}                                    & 3        \\
+    Resistor 5{,}1\,k$\Omega$ 1/4\unit{\W}                                    & 2        \\
+    Capacitor \qty{100}{\nano\F} \qty{10}{\V}                                           & 5        \\
+    Capacitor electrolítico \qty{10}{\micro\F} \qty{10}{\V}                           & 1        \\
     Conector jack 3.5\,mm 4 pines --- entrada SCT-013            & 3        \\
     Bloque de terminales 4P paso 5\,mm --- entrada red           & 1        \\
     Conector Molex KK 2P --- salida alimentación                 & 1        \\
@@ -560,7 +565,7 @@ Para la realización de esta práctica se utilizaron las siguientes herramientas
   \item \textbf{Entornos de Desarrollo y Software:}
     \begin{itemize}
       \item Visual Studio Code (con extensiones STM32 y PlatformIO).
-      \item \textbf{KiCad EDA:} Para el diseño del esquemático y el ruteo del circuito impreso.
+      \item KiCad EDA: Para el diseño del esquemático y el ruteo del circuito impreso.
       \item Docker y Docker Compose para el despliegue de la infraestructura remota.
       \item Grafana y Node-RED para la visualización y orquestación de datos.
     \end{itemize}
@@ -608,14 +613,14 @@ Para asegurar la exactitud de las mediciones, el dispositivo debe conectarse sig
   \item \textbf{Alimentación:} El medidor es un sistema autónomo que se alimenta directamente de la Fase 1, no se requiere de una fuente de alimentación externa adicional, ya que el hardware integra su propia etapa de alimentación.
 \end{enumerate}
 
-\begin{figure}[H]
-  \centering
-  \fbox{
-    \begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Esquema/Fotografía: Conexión de sensores y alimentación] \vspace{2cm}
-  \end{minipage}}
-  \caption{Diagrama de conexión física del medidor en el tablero eléctrico.}
-  \label{fig:manual_instalacion}
-\end{figure}
+% \begin{figure}[H]
+%   \centering
+%   \fbox{
+%     \begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Esquema/Fotografía: Conexión de sensores y alimentación] \vspace{2cm}
+%   \end{minipage}}
+%   \caption{Diagrama de conexión física del medidor en el tablero eléctrico.}
+%   \label{fig:manual_instalacion}
+% \end{figure}
 
 \subsection{Configuración Inicial del Dispositivo}
 
