@@ -194,7 +194,7 @@ La implementación del control dinámico de ganancia permite mantener linealidad
 
 \subsubsection{Diseño del Esquema Eléctrico y Circuito Impreso (PCB)}
 
-Para la integración física de los componentes y la validación del prototipo, se diseñó un circuito impreso (PCB) utilizando la herramienta de diseño electrónico automatizado (EDA) \textbf{KiCad}.
+Para la integración física de los componentes y la validación del prototipo, se diseñó un circuito impreso (PCB) utilizando la herramienta de diseño electrónico automatizado (EDA) \textbf{KiCad}, cuyo diagrama esquemático se presenta en la figura~\ref{fig:pcb_schematic}.
 
 
 \begin{figure}[htbp]
@@ -294,6 +294,8 @@ del sensor en ambos escenarios.
 
 \subsection{Implementación del Firmware}
 
+El desarrollo del firmware se estructuró en función de la división de tareas entre el núcleo de medición (STM32F103) y la pasarela de comunicaciones (ESP32-C3). Cabe destacar que tanto la descripción detallada del firmware del STM32F103 como el análisis pormenorizado de la exactitud y precisión de la medición del prototipo se delegan al informe de Práctica Profesional Supervisada (PPS) del estudiante Francisco Moglia, colaborador en el proyecto. A continuación, se presentan los aspectos esenciales de su diseño para facilitar la comprensión integral del sistema.
+
 \subsubsection{Cómputo de Variables Eléctricas (STM32F103)}
 
 El núcleo de medición se basa en un STM32F103 que ejecuta un bucle de procesamiento. Los aspectos más destacados de su implementación incluyen:
@@ -334,7 +336,7 @@ El dispositivo implementa una interfaz de configuración y monitoreo local acces
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
     \includegraphics[height=9cm]{imgs/portal_2.jpeg}
-    \caption{Portal captivo detectado al conectar.}
+    \caption{Portal captivo.}
     \label{fig:portal_2}
   \end{subfigure}
   \\[2ex]
@@ -400,6 +402,21 @@ La arquitectura de servicios remotos se diseñó bajo un enfoque de microservici
 
 \subsubsection{Infraestructura en la Nube y Dockerización}
 
+La arquitectura general del sistema en la nube y los flujos de datos entre sus componentes principales se presentan en la figura~\ref{fig:arquitectura_cloud}. Esta topología se estructura en torno a tres entornos interconectados:
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{imgs/arquitectura_cloud.png}
+  \caption{Diagrama de la arquitectura del sistema en la nube y flujos de datos.}
+  \label{fig:arquitectura_cloud}
+\end{figure}
+
+\begin{itemize}
+  \item \textbf{Instalación del Cliente (Red Local):} Contempla el medidor físico, responsable de la adquisición de señales eléctricas, y el servidor web interno del dispositivo para tareas de configuración y monitoreo directo en la red local.
+  \item \textbf{Servidor Virtual Privado (VPS):} Constituye la red interna de servicios del backend. El tráfico de telemetría proveniente del medidor es recibido por el broker MQTT (Mosquitto) mediante el protocolo MQTTS (puerto 8883) bajo cifrado TLS. La lógica de integración está a cargo de Node-RED, que actúa como middleware para procesar las tramas JSON y persistirlas en TimescaleDB. La consulta y administración de datos se realiza de manera segura mediante Grafana (visualización) y pgAdmin (gestión), cuyas conexiones externas son canalizadas por un proxy inverso Nginx (SWAG) utilizando HTTPS (puerto 443).
+  \item \textbf{Monitoreo Remoto (Navegador Externo):} Entorno de acceso cliente desde el cual los usuarios y administradores acceden al sistema a través de una conexión cifrada HTTPS establecida con el proxy inverso.
+\end{itemize}
+
 El despliegue se orquestó mediante \textbf{Docker Compose}, integrando los siguientes servicios clave para el funcionamiento del sistema:
 
 \begin{itemize}
@@ -428,7 +445,7 @@ El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se dem
 
 \subsubsection{Orquestación de Flujos con Node-RED}
 
-\textbf{Node-RED} actúa como capa de integración lógica del sistema (\textit{middleware}). Entre sus responsabilidades se incluyen:
+\textbf{Node-RED} actúa como capa de integración lógica del sistema (\textit{middleware}), cuya estructura de flujos se muestra en la figura~\ref{fig:nodered_flows}. Entre sus responsabilidades se incluyen:
 
 \begin{itemize}
   \item \textbf{Suscripción MQTT:} Escucha los tópicos donde los medidores publican su información.
@@ -445,7 +462,7 @@ El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se dem
 
 \subsubsection{Visualización con Grafana}
 
-La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo una visualización dinámica y en tiempo real de los parámetros eléctricos:
+La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo una visualización dinámica y en tiempo real de los parámetros eléctricos (como se muestra en la figura~\ref{fig:grafana_dashboard}):
 
 \begin{itemize}
   \item \textbf{Dashboard Principal:} Muestra variables críticas como potencia activa total, tensiones de fase, corrientes y energía acumulada.
@@ -454,7 +471,7 @@ La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo 
   \item \textbf{Gestión de Usuarios y Control de Acceso:} Se utiliza el sistema de autenticación de Grafana para gestionar diferentes niveles de permisos. Esta capacidad es clave para la empresa, ya que permite aislar los dashboards de cada cliente, asegurando que cada usuario final visualice únicamente la información perteneciente a su instalación fotovoltaica.
 \end{itemize}
 
-\begin{figure}[H]
+\begin{figure}[htb]
   \centering
   \begin{subfigure}[b]{0.48\textwidth}
     \centering
@@ -474,6 +491,8 @@ La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo 
 \end{figure}
 
 \subsection{Ensayos y Resultados}
+
+En este apartado se presentan los resultados correspondientes a la construcción del prototipo físico y los ensayos orientados a validar el funcionamiento global de la integración de hardware y firmware. Cabe señalar que los análisis exhaustivos respecto a la caracterización de la exactitud y precisión de la medición del prototipo, sus curvas de calibración fina y ensayos extendidos bajo variaciones de carga son abordados en detalle en el informe de Práctica Profesional Supervisada (PPS) del estudiante Francisco Moglia, colaborador de este proyecto.
 
 \subsubsection{Implementación del prototipo}
 
@@ -536,59 +555,42 @@ La tabla \ref{tab:componentes} detalla el listado de componentes utilizados para
 Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verificar dos propiedades metrológicas clave del sistema: la exactitud (proximidad entre el valor medido y el valor de referencia) y la linealidad (capacidad de mantener una respuesta proporcional en todo el rango operativo). Las pruebas se ejecutaron sobre cargas representativas de uso residencial y comercial ligero, comparando las mediciones del equipo desarrollado contra un instrumento patrón de laboratorio.
 
 \begin{description}[leftmargin=0pt]
-  \item[Metodología de ensayo:] Se utilizó una fuente de alimentación variable capaz de simular cargas resistivas, inductivas y capacitivas, permitiendo generar corrientes de hasta \SI{50}{\ampere} RMS con factores de potencia ajustables. Para cada punto de ensayo, se registraron simultáneamente las mediciones del prototipo y del instrumento de referencia, para luego calcular el error relativo porcentual y realizar un análisis de linealidad mediante ajuste de regresión lineal.
-  
-  Para asegurar una evaluación exhaustiva, la validación se planteó como una matriz cruzada combinando distintos niveles de corriente y variaciones en el factor de potencia. Específicamente, el sistema fue evaluado bajo corrientes de \qty{0.5}{\ampere}, \qty{1}{\ampere}, \qty{5}{\ampere}, \qty{10}{\ampere}, \qty{20}{\ampere}, \qty{35}{\ampere} y \qty{50}{\ampere} RMS. Para corrientes iguales o superiores a \qty{5}{\ampere}, se realizaron mediciones tanto en modo de consumo —con desfase nulo (\qty{0}{\degree}) y desplazamientos angulares de $\pm\qty{15}{\degree}$, $\pm\qty{30}{\degree}$ y $\pm\qty{45}{\degree}$ (abarcando corrientes tanto en adelanto como en atraso)— como en modo de inyección de energía a la red, aplicando un desfase de \qty{180}{\degree} (midiendo a \qty{180}{\degree} y desplazamientos de $\qty{180}{\degree} \pm \qty{15}{\degree}$, $\qty{180}{\degree} \pm \qty{30}{\degree}$ y $\qty{180}{\degree} \pm \qty{45}{\degree}$). Por el contrario, en los escenarios de baja carga (corrientes menores a \qty{5}{\ampere}), debido a que la medición del ángulo presenta mayores fluctuaciones, los ensayos se limitaron a los escenarios principales de consumo e inyección pura (\qty{0}{\degree} y \qty{180}{\degree}) y a los desplazamientos de $\pm\qty{30}{\degree}$ respecto de los mismos. Este enfoque multivariable, documentado mediante suficientes ciclos por punto para obtener medias y desviaciones estándar robustas, permite verificar empíricamente que el cálculo de potencia activa y el bloque de compensación de fase en el firmware mantienen su exactitud independientemente del tipo de instalación (inductiva, puramente resistiva o capacitiva) y del sentido del flujo de energía, además de someter a prueba la respuesta de la etapa de ganancia automática (\textit{auto-ranging}) en corrientes bajas.
+  \item[Metodología de ensayo:] Los ensayos se estructuraron en dos etapas diferenciadas haciendo uso de una fuente de alimentación variable capaz de simular cargas resistivas y reactivas, comparando las lecturas del prototipo con las de la fuente. Con el fin de evaluar la respuesta del sistema tanto en consumo como en inyección, se registraron mediciones con flujos de corriente en ambos sentidos (desfases de \qty{0}{\degree} y \qty{180}{\degree}, respectivamente) y bajo desfases angulares de \qty{10}{\degree} y \qty{45}{\degree} en todos los escenarios. Las dos etapas de ensayo se definieron de la siguiente manera:
+        \begin{itemize}
+          \item \textbf{Primera etapa (Configuración Trifásica):} Se configuró la fuente en modalidad trifásica para evaluar el sistema en condiciones realistas de funcionamiento. En esta fase se ensayaron corrientes de \qty{0.6}{\ampere}, \qty{2}{\ampere}, \qty{5}{\ampere}, \qty{10}{\ampere} y \qty{15}{\ampere}. La corriente máxima en esta etapa se limitó a \qty{15}{\ampere} debido a restricciones en la entrega de potencia de la fuente en su configuración trifásica.
+          \item \textbf{Segunda etapa (Configuración Monofásica en Paralelo):} Con el propósito de verificar el comportamiento del dispositivo ante corrientes mayores, se reconfiguró la fuente en modo monofásico, puenteando la salida para alimentar de forma síncrona las tres fases del prototipo. Esto permitió evaluar cargas de \qty{5}{\ampere}, \qty{25}{\ampere} y \qty{50}{\ampere}.
+        \end{itemize}
 
-  \item[Resultados de exactitud:] En la figura~\ref{fig:exactitud_potencia_placeholder} se presenta el comportamiento del error relativo de potencia activa en función del nivel de carga. De manera complementaria, la figura~\ref{fig:exactitud_rms_placeholder} resume el error relativo para tensión y corriente RMS. En ambos casos se observa que el error se mantiene acotado dentro de una banda compatible con los objetivos de diseño del prototipo para monitoreo energético distribuido.
-
-\begin{figure}[H]
-  \centering
-  \fbox{%
-    \begin{minipage}{0.9\textwidth}
-      \centering
-      \vspace{3cm}
-      [Placeholder: Gráfico de error relativo de potencia activa vs. nivel de carga]
-      \vspace{3cm}
-    \end{minipage}%
-  }
-  \caption{Error relativo de potencia activa para distintos niveles de carga.}
-  \label{fig:exactitud_potencia_placeholder}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \fbox{%
-    \begin{minipage}{0.9\textwidth}
-      \centering
-      \vspace{3cm}
-      [Placeholder: Gráfico de error relativo de tensión y corriente RMS]
-      \vspace{3cm}
-    \end{minipage}%
-  }
-  \caption{Error relativo de tensión y corriente RMS respecto del instrumento de referencia.}
-  \label{fig:exactitud_rms_placeholder}
-\end{figure}
-
-  \item[Resultados de linealidad:] La linealidad del canal de medición se evaluó graficando el valor reportado por el prototipo frente al valor de referencia para cada punto de ensayo. La figura~\ref{fig:linealidad_placeholder} muestra la nube de puntos con su recta de ajuste. El comportamiento observado evidencia una relación prácticamente lineal en el rango analizado, con desviaciones pequeñas y sin tendencias marcadas en los residuales.
-
-\begin{figure}[H]
-  \centering
-  \fbox{%
-    \begin{minipage}{0.9\textwidth}
-      \centering
-      \vspace{3cm}
-      [Placeholder: Gráfico de linealidad (valor medido vs. valor de referencia) con ajuste lineal]
-      \vspace{3cm}
-    \end{minipage}%
-  }
-  \caption{Evaluación de linealidad del sistema mediante comparación directa contra referencia.}
-  \label{fig:linealidad_placeholder}
-\end{figure}
-
+  \item[Resultados de los ensayos:] Los resultados de error relativo y linealidad obtenidos para las corrientes y desfases ensayados en ambas etapas se presentan gráficamente en la figura~\ref{fig:resultados_trifasica} (para la etapa de ensayo trifásica) y en la figura~\ref{fig:resultados_monofasica} (para la etapa de ensayo monofásica de alta potencia). En ambas configuraciones, se observa que la respuesta del sistema se mantiene estable tanto para condiciones de inyección como de consumo, demostrando la consistencia de los algoritmos de cálculo e integración de señales implementados en el prototipo.
 \end{description}
 
-En síntesis, los ensayos de exactitud y linealidad validan que la arquitectura de medición propuesta es adecuada para su aplicación en monitoreo fotovoltaico trifásico bidireccional. La combinación de acondicionamiento analógico, muestreo sincronizado y compensación digital de fase permitió sostener una respuesta estable y consistente en todo el rango de operación ensayado.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{imgs/resultados_trifasica.png}
+  \caption{Curvas de error y linealidad obtenidas en la primera etapa de ensayos con alimentación trifásica (\qty{0.6}{\ampere} a \qty{15}{\ampere}).}
+  \label{fig:resultados_trifasica}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{imgs/resultados_monofasica.png}
+  \caption{Curvas de error y linealidad obtenidas en la segunda etapa de ensayos con alimentación monofásica en paralelo (\qty{5}{\ampere} a \qty{50}{\ampere}).}
+  \label{fig:resultados_monofasica}
+\end{figure}
+
+\subsubsection{Análisis y Discusión de Resultados}
+
+El análisis cuantitativo de los datos consolidados en los ensayos permite extraer las siguientes conclusiones sobre el comportamiento del sistema de medición:
+
+\begin{itemize}
+  \item \textbf{Comportamiento ante Baja Carga:} En la primera etapa (figura~\ref{fig:resultados_trifasica}), para una corriente de \qty{0.6}{\ampere}, se observa una mayor dispersión y magnitud en los errores relativos. Específicamente, en el modo de consumo los errores son de signo positivo (mediana entre \qty{7}{\percent} y \qty{8}{\percent}), mientras que en el modo de inyección los errores se tornan negativos (mediana entre \qty{-6}{\percent} y \qty{-12}{\percent}). Este cambio de signo opuesto al invertir el flujo de potencia es indicativo de la presencia de un desvío constante (\textit{offset} o bias) en el canal de lectura de corriente o en el procesamiento analógico de la señal.
+  \item \textbf{Estabilización en Carga Media y Alta:} A partir de corrientes superiores a \qty{2}{\ampere}, las lecturas se estabilizan significativamente, reduciendo la dispersión. En el rango de \qty{2}{\ampere} a \qty{15}{\ampere} (figura~\ref{fig:resultados_trifasica}), la mediana del error relativo se mantiene acotada dentro de la banda de $\pm\qty{4}{\percent}$, alcanzando el comportamiento más estrecho (rango inter-cuartil de aproximadamente \qty{1}{\percent} a \qty{2}{\percent} de dispersión) al aproximarse a los \qty{15}{\ampere}.
+  \item \textbf{Evaluación en Escala Ampliada:} En la segunda etapa (figura~\ref{fig:resultados_monofasica}), el error relativo se mantiene muy reducido, oscilando en torno al $\pm\qty{1}{\percent}$ para corrientes de \qty{5}{\ampere} y \qty{25}{\ampere}. Esto demuestra que la técnica de conmutación de ganancia automática (\textit{auto-ranging}) y las constantes de calibración operan de manera óptima en el rango de consumo intermedio.
+  \item \textbf{Desviación a Alta Carga:} Al alcanzar los \qty{50}{\ampere} (figura~\ref{fig:resultados_monofasica}), se aprecia un desplazamiento sistemático de los errores: en consumo los errores se vuelven negativos (mediana entre \qty{-1.5}{\percent} y \qty{-2.6}{\percent}) y en inyección se vuelven positivos (mediana entre \qty{1.0}{\percent} y \qty{2.0}{\percent}). Este comportamiento indica una subestimación sistemática en la magnitud de la potencia calculada.
+  \item \textbf{Ajuste de Fase y Dispersión entre Canales:} El hecho de que la dispersión de los errores se mantenga reducida incluso bajo desfases exigentes de \qty{10}{\degree} y \qty{45}{\degree} valida la efectividad del algoritmo de compensación de desfase implementado en el firmware. Por otro lado, la Fase~3 muestra de forma consistente errores ligeramente más positivos (o menos negativos) que las Fases~1 y 2, evidenciando un desbalance menor en la ganancia de hardware de este canal de adquisición que requiere calibración fina.
+\end{itemize}
+
+En síntesis, si bien los ensayos de exactitud y linealidad validan la viabilidad de la arquitectura propuesta para el monitoreo fotovoltaico bidireccional, los desvíos observados en los extremos del rango operativo indican la necesidad de continuar trabajando en la calibración y el refinamiento de la etapa analógica para alcanzar un mayor grado de precisión y exactitud en la medición. Por otro lado, cabe destacar que durante la totalidad de estos ensayos se verificó el correcto funcionamiento de la infraestructura de comunicación y almacenamiento: la totalidad de los datos de medición fue transmitida con éxito y de manera remota a la base de datos a través de los servicios descritos, demostrando que el subsistema IoT operó según los requerimientos de diseño establecidos.
 
 \section{Vinculación de las tareas/proyectos con Asignaturas de la Carrera}
 
@@ -731,7 +733,7 @@ El despliegue del backend se realiza de forma centralizada mediante Docker, sigu
 \label{sec:anexo_pcb}
 
 
-En esta sección se presentan las capturas detalladas del diseño del circuito impreso (PCB) realizado en KiCad, incluyendo el ruteado de pistas, la disposición de componentes y vistas en tres dimensiones. El proyecto completo con los archivos fuente se encuentra disponible en el repositorio de KiCad compartido anteriormente (\url{https://github.com/fabcontigiani/kicad-pps-enerlab}).
+En esta sección se presentan las capturas detalladas del diseño del circuito impreso (PCB) realizado en KiCad. Específicamente, se ilustran el ruteado de la capa superior en la figura~\ref{fig:anexo_pcb_top}, el ruteado de la capa inferior en la figura~\ref{fig:anexo_pcb_bottom}, y el renderizado 3D de la placa ensamblada en la figura~\ref{fig:anexo_pcb_3d}. El proyecto completo con los archivos fuente se encuentra disponible en el repositorio de KiCad compartido anteriormente (\url{https://github.com/fabcontigiani/kicad-pps-enerlab}).
 
 
 \begin{figure}[H]
