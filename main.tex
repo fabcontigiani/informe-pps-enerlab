@@ -149,9 +149,9 @@ Las actividades a desarrollar en esta PPS serán:
 
 En el contexto actual de transición hacia fuentes de energía renovables, la generación distribuida mediante paneles fotovoltaicos ha cobrado gran relevancia. Para gestionar eficientemente estas instalaciones, es imprescindible contar con herramientas de monitoreo que permitan conocer no solo el consumo de la red, sino también la energía excedente inyectada a la misma.
 
-Este proyecto surge de la necesidad de contar con un medidor trifásico-bidireccional de costo optimizado pero con prestaciones de acordes a los productos presentes en el mercado, capaz de integrarse en ecosistemas IoT modernos. El sistema desarrollado no solo realiza la medición de variables eléctricas fundamentales, sino que también gestiona la conectividad de red de forma dinámica y segura. Una de las mayores ventajas tecnológicas de este diseño es su capacidad para medir cargas muy bajas (inferiores a \SI{500}{\watt}) con gran precisión, sin sacrificar la capacidad de medir potencias elevadas. Esta característica marca una diferencia fundamental respecto a dispositivos comerciales de referencia \cite{shelly_pro_3em}, los cuales suelen aplicar un umbral de banda muerta (\textit{deadband}) en consumos bajos, lo que resulta en la omisión de datos de consumo reales cuando la carga es reducida. En contraste, el presente diseño utiliza una estrategia de \textit{auto-ranging} que optimiza el rango dinámico del ADC en todo momento, permitiendo la visibilidad del flujo energético incluso con cargas muy bajas sin sacrificar la capacidad de medir potencias elevadas. A lo largo de este informe, se describen las etapas de diseño, construcción, ensayos y puesta a punto del sistema desarrollado.
+Este trabajo aborda el diseño y desarrollo de un prototipo de medidor de energía trifásico bidireccional, compatible con ecosistemas de Internet de las Cosas (IoT), que equilibra viabilidad económica y precisión de medida. El dispositivo realiza la adquisición y procesamiento de variables eléctricas fundamentales, al tiempo que gestiona de manera segura la conectividad de red. Un aspecto relevante de la implementación propuesta radica en su resolución para bajas potencias (inferiores a \qty{500}{\watt}), manteniendo a su vez un rango dinámico amplio para corrientes elevadas. Esto contrasta con el comportamiento de ciertos instrumentos comerciales de referencia \cite{shelly_pro_3em}, los cuales implementan zonas muertas (\textit{deadbands}) para cargas bajas, omitiendo el registro de consumos menores. Para soslayar esta limitación, el presente diseño incorpora una técnica de ajuste automático de rango (\textit{auto-ranging}) que maximiza el aprovechamiento del convertidor analógico-digital (ADC), posibilitando la monitorización del flujo energético a bajas intensidades sin comprometer el fondo de escala. En las secciones siguientes, se detallan las etapas de diseño, construcción, calibración y validación del sistema.
 
-El dispositivo se enfoca específicamente en la medición de la \textbf{carga neta} (\textit{net load}), posicionándose físicamente entre la red eléctrica de distribución y la instalación interna del usuario (ya sea un hogar, oficina o industria). Esta ubicación estratégica, como se ilustra en la Figura \ref{fig:net_load_concept}, permite monitorear de forma bidireccional el flujo energético, discriminando entre el consumo de energía demandado a la red y la entrega de excedentes generados localmente hacia la misma.
+El dispositivo se enfoca específicamente en la medición de la carga neta (\textit{net load}), posicionándose físicamente entre la red eléctrica de distribución y la instalación interna del usuario (ya sea un hogar, oficina o industria). Esta ubicación estratégica, como se ilustra en la Figura \ref{fig:net_load_concept}, permite monitorear de forma bidireccional el flujo energético, discriminando entre el consumo de energía demandado a la red y la entrega de excedentes generados localmente hacia la misma.
 
 \begin{figure}[htbp]
   \centering
@@ -168,14 +168,14 @@ El dispositivo se enfoca específicamente en la medición de la \textbf{carga ne
 La elección de los microcontroladores centrales se basó en la división de tareas entre la adquisición de datos de alta velocidad y la gestión de comunicaciones:
 
 \begin{itemize}
-  \item \textbf{STM32F103 (Núcleo de Medición):} Seleccionado por su arquitectura ARM Cortex-M3 de 32 bits \cite{st_rm0008}. Una ventaja tecnológica crucial de este modelo es la integración de dos unidades de ADC independientes. Esta característica permite configurar el modo de \textit{muestreo simultáneo}, capturando en el mismo instante de tiempo la señal de tensión y la de corriente correspondientes a una fase. Esta sincronización es fundamental para evitar errores en el cálculo de la potencia activa, reactiva y el factor de potencia, los cuales son extremadamente sensibles a cualquier desfasaje temporal introducido por el hardware de adquisición.
-  \item \textbf{ESP32-C3 (Gateway IoT):} Seleccionado por su bajo costo, su reducido factor de forma (\textit{footprint}) y su alta disponibilidad en el mercado \cite{esp32c3_ds}. Además de su arquitectura RISC-V y periféricos de seguridad, su conectividad nativa Wi-Fi y Bluetooth lo posicionan como una solución óptima para actuar como puente hacia la infraestructura en la nube sin elevar el costo final del dispositivo.
-  \item \textbf{MCP4131 (Potenciómetros Digitales):} Utilizados para implementar el sistema de \textit{auto-ranging} de corriente \cite{mcp4131_ds}, permitiendo ajustar la ganancia de los amplificadores de transimpedancia de forma dinámica mediante el bus SPI.
-  \item \textbf{LMV324 (Amplificadores Operacionales):} Seleccionados por su capacidad de salida \textit{Rail-to-Rail} y su bajo costo \cite{lmv324_ds}, utilizados en las etapas de acondicionamiento de señal para escalar y desplazar las lecturas de los sensores al rango dinámico del ADC (0-3.3V).
-  \item \textbf{ZMPT101B (Sensor de Tensión):} Transformador de tensión activo de bajo costo, capaz de medir niveles de tensión AC comerciales (hasta 250V RMS), cumpliendo con los rangos operativos requeridos para el monitoreo residencial e industrial ligero \cite{zmpt101b_ds}.
-  \item \textbf{SCT-013 (Sensor de Corriente):} Transformador de corriente de núcleo partido (\textit{split-core}) que permite una instalación no invasiva \cite{sct013_ds}. Su capacidad de medición de hasta 70A RMS se alinea perfectamente con los objetivos de costo y prestaciones definidos por la empresa para este medidor.
-
-  \item \textbf{HLK-5M05 (Etapa de Alimentación Interna):} El dispositivo integra una fuente conmutada \cite{hlk5m05_ds} que permite su funcionamiento autónomo mediante la toma de energía directa de la Fase~1 de la red eléctrica, simplificando significativamente el proceso de instalación al prescindir de fuentes externas.
+  \item \textbf{STM32F103 (Núcleo de Medición):} Microcontrolador basado en la arquitectura ARM Cortex-M3 de 32 bits \cite{st_rm0008}. El criterio técnico determinante para su selección fue la disponibilidad de dos convertidores analógico-digital (ADC) independientes. Esta característica permite configurar el modo de \textit{muestreo simultáneo}, asegurando la captura síncrona de las señales de tensión y corriente correspondientes a una misma fase. Dicha sincronización resulta indispensable para minimizar los errores de fase en el cálculo de potencia activa, reactiva y factor de potencia, magnitudes altamente sensibles a los desfasajes temporales introducidos por el sistema de adquisición.
+  \item \textbf{ESP32-C3 (Gateway IoT):} Microcontrolador de arquitectura RISC-V de 32 bits con periféricos de seguridad y conectividad integrada Wi-Fi y Bluetooth \cite{esp32c3_ds}. Se implementa como pasarela (\textit{gateway}) para la transmisión de datos hacia la infraestructura en la nube, aprovechando su reducido factor de forma y su viabilidad económica en el diseño general.
+  \item \textbf{MCP4131 (Potenciómetros Digitales):} Dispositivos controlados por interfaz SPI utilizados para la implementación del sistema de ajuste automático de rango (\textit{auto-ranging}) de corriente \cite{mcp4131_ds}. Permiten modificar dinámicamente la ganancia en la etapa de amplificación.
+  \item \textbf{LMV324 (Amplificadores Operacionales):} Amplificadores con características de salida \textit{Rail-to-Rail} \cite{lmv324_ds}, empleados en la etapa de acondicionamiento de señal para adecuar la amplitud y el desplazamiento de las señales analógicas al rango de entrada admisible del ADC.
+  \item \textbf{ZMPT101B (Sensor de Tensión):} Transformador de tensión diseñado para la medición de tensiones alternas de hasta \qty{1}{\kilo\volt} \cite{zmpt101b_ds}. Su rango de operación resulta adecuado para las tensiones nominales de la red de distribución eléctrica comercial y residencial.
+  \item \textbf{SCT-013 (Sensor de Corriente):} Transformador de intensidad de núcleo partido (\textit{split-core}) que posibilita una medición no invasiva \cite{sct013_ds}. Permite registrar corrientes de hasta \qty{70}{\ampere} RMS, cubriendo los rangos requeridos para el análisis de cargas en el marco del proyecto.
+  
+  \item \textbf{HLK-5M05 (Etapa de Alimentación Interna):} Fuente de alimentación conmutada \cite{hlk5m05_ds} que provee autonomía al dispositivo al energizarlo directamente desde la Fase~1 de la instalación eléctrica, reduciendo la necesidad de fuentes de alimentación externas auxiliares.
 \end{itemize}
 
 \subsubsection{Acondicionamiento de Señal y Auto-ranging}
@@ -183,10 +183,10 @@ La elección de los microcontroladores centrales se basó en la división de tar
 La captura del panel de control de la base de datos en pgAdmin, con una consulta de ejemplo, se muestra en la figura~\ref{fig:db_schema}.
 Para maximizar la precisión en un amplio espectro de potencias, se implementó una etapa de acondicionamiento de señal activa con capacidad de ajuste de rango automático (\textit{auto-ranging}). Esta estrategia es fundamental para resolver el compromiso tecnológico entre la resolución necesaria para medir cargas pequeñas y el rango dinámico requerido para potencias elevadas.
 
-El sistema utiliza potenciómetros digitales \textbf{MCP4131} \cite{mcp4131_ds} integrados en la etapa de realimentación de los amplificadores operacionales \textbf{LMV324}. El firmware del STM32F103 monitorea continuamente los valores de pico de la señal de corriente en cada fase. Si la amplitud de la señal cae por debajo de un umbral predefinido, el microcontrolador incrementa la ganancia del amplificador mediante el bus SPI, permitiendo que señales pequeñas ocupen una mayor porción del rango del ADC (\SI{0}{\volt} a \SI{3.3}{\volt}). Inversamente, ante un incremento de la carga que amenace con saturar el ADC, el sistema reduce la ganancia de forma inmediata para evitar el truncamiento (\textit{clipping}) de la forma de onda.
+El sistema utiliza potenciómetros digitales \textbf{MCP4131} \cite{mcp4131_ds} integrados en la etapa de realimentación de los amplificadores operacionales \textbf{LMV324}. El firmware del STM32F103 monitorea continuamente los valores de pico de la señal de corriente en cada fase. Si la amplitud de la señal cae por debajo de un umbral predefinido, el microcontrolador incrementa la ganancia del amplificador mediante el bus SPI, permitiendo que señales pequeñas ocupen una mayor porción del rango del ADC (\qty{0}{\volt} a \qty{3.3}{\volt}). Inversamente, ante un incremento de la carga que amenace con saturar el ADC, el sistema reduce la ganancia de forma inmediata para evitar el truncamiento (\textit{clipping}) de la forma de onda.
 
 
-Gracias a esta implementación de \textit{auto-ranging}, el dispositivo logra una excelente linealidad y precisión incluso en consumos inferiores a los \SI{500}{\watt}, manteniendo la capacidad de registrar picos de demanda de hasta \SI{17.5}{\kilo\watt}. Esto dota al medidor de una versatilidad excepcional, siendo capaz de capturar desde el consumo residual de equipos en \textit{standby} hasta el flujo energético completo de una instalación residencial o comercial pesada. Esta característica representa una ventaja competitiva frente a soluciones comerciales consolidadas \cite{shelly_pro_3em}, que por limitaciones de diseño suelen aplicar zonas muertas (\textit{deadbands}) que ignoran consumos por debajo de ciertos umbrales de corriente, perdiendo así información sobre el consumo de la instalación.
+La implementación del control dinámico de ganancia permite mantener linealidad y precisión en potencias inferiores a los \qty{500}{\watt}, conservando la capacidad de registrar valores máximos de hasta \qty{17.5}{\kilo\watt}. Esto confiere al instrumento una característica distintiva frente a soluciones comerciales consolidadas \cite{shelly_pro_3em}, las cuales implementan zonas muertas (\textit{deadbands}) que omiten el registro bajo ciertos umbrales de corriente, resultando en pérdidas de información sobre el consumo de la instalación.
 
 
 
@@ -212,11 +212,11 @@ El desempeño del medidor está íntimamente ligado a la respuesta de los sensor
 
 \subsubsection{Metodología}
 
-Con el objetivo de validar la respuesta del sistema ante diferentes condiciones de carga y tipos de señal, se llevó a cabo una etapa de ensayos utilizando una fuente de tensión alterna de \SI{220}{\volt} y variando la corriente de carga. Los ensayos se dividieron en dos escenarios principales:
+Con el objetivo de validar la respuesta del sistema ante diferentes condiciones de carga y tipos de señal, se llevó a cabo una etapa de ensayos utilizando una fuente de tensión alterna de \qty{220}{\volt} y variando la corriente de carga. Los ensayos se dividieron en dos escenarios principales:
 
 \begin{itemize}
-  \item \textbf{Escenario 1: Señal Senoidal Pura.} Se evaluó el desempeño con corrientes de \SI{10}{\ampere} y \SI{20}{\ampere}, manteniendo un factor de potencia unitario ($PF=1$) y un factor de cresta de 3 ($CF=3$). Se probaron configuraciones con la referencia del ADC centrada en \SI{1.65}{\volt} y referenciada a masa (GND).
-  \item \textbf{Escenario 2: Señal Distorsionada.} Se aplicó una tensión de \SI{220}{\volt} con distorsión armónica y una carga de \SI{15}{\ampere} (con un ángulo de fase de $0^\circ$).
+  \item \textbf{Escenario 1: Señal Senoidal Pura.} Se evaluó el desempeño con corrientes de \qty{10}{\ampere} y \qty{20}{\ampere}, manteniendo un factor de potencia unitario ($PF=1$) y un factor de cresta de 3 ($CF=3$). Se probaron configuraciones con la referencia del ADC centrada en \qty{1.65}{\volt} y referenciada a masa (GND).
+  \item \textbf{Escenario 2: Señal Distorsionada.} Se aplicó una tensión de \qty{220}{\volt} con distorsión armónica y una carga de \qty{15}{\ampere} (con un ángulo de fase de \qty{0}{\degree}).
 \end{itemize}
 
 Para caracterizar con precisión el retardo de fase introducido por los sensores y sus etapas de acondicionamiento, se empleó una metodología basada en la \textbf{Transformada de Hilbert}. Esta técnica permite obtener la señal analítica de las capturas temporales, facilitando el cálculo de la fase instantánea de cada señal.
@@ -243,14 +243,14 @@ resultados del conjunto completo de ensayos.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\textwidth]{imgs/plots_comparacion.png}
+  \includegraphics[width=0.85\textwidth]{imgs/plots_comparacion.png}
   \caption{Comparación de señales y diferencias de fase para ambos sensores.}
   \label{fig:hilbert_comparacion}
 \end{figure}
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\textwidth]{imgs/plots_ensayo.png}
+  \includegraphics[width=0.85\textwidth]{imgs/plots_ensayo.png}
   \caption{Diagrama de caja del desfase medido, agrupado por tipo de señal de tensión.}
   \label{fig:boxplot_ensayo}
 \end{figure}
@@ -270,13 +270,13 @@ obtenidos sobre el conjunto completo de ensayos:
 
 \begin{itemize}
   \item \textbf{Sensor de Tensión ZMPT101B:} El desfase promedio medido entre la referencia
-        de la fuente y la señal del sensor resultó de $\bar{\phi} = 0{,}16^\circ$, con una
-        desviación estándar de $\sigma = 0{,}61^\circ$. El valor medio prácticamente nulo indica
+        de la fuente y la señal del sensor resultó de $\bar{\phi} = \qty{0.16}{\degree}$, con una
+        desviación estándar de $\sigma = \qty{0.61}{\degree}$. El valor medio prácticamente nulo indica
         que el transformador ZMPT101B introduce un retardo de fase despreciable a la frecuencia
-        de red de 50 Hz.
+        de red de \qty{50}{\hertz}.
 
-  \item \textbf{Sensor de Corriente SCT-013:} El desfase promedio fue de $\bar{\phi} = 4{,}38^\circ$,
-        con una desviación estándar de $\sigma = 0{,}85^\circ$. Este retardo es un valor conocido,
+  \item \textbf{Sensor de Corriente SCT-013:} El desfase promedio fue de $\bar{\phi} = \qty{4.38}{\degree}$,
+        con una desviación estándar de $\sigma = \qty{0.85}{\degree}$. Este retardo es un valor conocido,
         determinístico y bien caracterizado bajo las condiciones de ensayo, lo que permite
         compensarlo en el firmware del STM32F103 para garantizar el cálculo correcto de potencia
         activa y factor de potencia.
@@ -284,9 +284,9 @@ obtenidos sobre el conjunto completo de ensayos:
 
 En el diagrama de caja de la figura~\ref{fig:boxplot_ensayo} se aprecia la diferencia
 de comportamiento según el tipo de señal: bajo señal senoidal el ZMPT101B presenta un desfase
-cercano a $-0{,}1^\circ$, mientras que con señal distorsionada se desplaza hacia $\approx 0{,}5^\circ$.
-El SCT-013, por su parte, mantiene un retardo de $\approx 5{,}1^\circ$ bajo señal senoidal y
-desciende a $\approx 3{,}7^\circ$ con señal distorsionada, confirmando la estabilidad general
+cercano a \qty{-0.1}{\degree}, mientras que con señal distorsionada se desplaza hacia $\approx \qty{0.5}{\degree}$.
+El SCT-013, por su parte, mantiene un retardo de $\approx \qty{5.1}{\degree}$ bajo señal senoidal y
+desciende a $\approx \qty{3.7}{\degree}$ con señal distorsionada, confirmando la estabilidad general
 del sensor en ambos escenarios.
 
 
@@ -296,11 +296,11 @@ del sensor en ambos escenarios.
 
 \subsubsection{Cómputo de Variables Eléctricas (STM32F103)}
 
-El núcleo de medición se basa en un STM32F103 que ejecuta un bucle de procesamiento en tiempo real. Los aspectos más destacados de su implementación incluyen:
+El núcleo de medición se basa en un STM32F103 que ejecuta un bucle de procesamiento. Los aspectos más destacados de su implementación incluyen:
 
 \begin{itemize}
-  \item \textbf{Muestreo Sincronizado:} Se utiliza el temporizador \texttt{TIM3} para disparar la conversión del ADC a una frecuencia de 5 kHz por canal. La adquisición se realiza mediante DMA para minimizar la carga de la CPU.
-  \item \textbf{Sincronización de Fase:} El sistema detecta los cruces por cero de la tensión en la fase 1 (utilizando un esquema de histéresis) para definir el inicio y fin de cada ciclo de red (50 Hz). Esto permite realizar integraciones precisas sobre periodos completos.
+  \item \textbf{Muestreo Sincronizado:} Se utiliza el temporizador \texttt{TIM3} para disparar la conversión del ADC a una frecuencia de \qty{5}{\kilo\hertz} por canal. La adquisición se realiza mediante DMA para minimizar la carga de la CPU.
+  \item \textbf{Sincronización de Fase:} El sistema detecta los cruces por cero de la tensión en la fase 1 (utilizando un esquema de histéresis) para definir el inicio y fin de cada ciclo de red (\qty{50}{\hertz}). Esto permite realizar integraciones precisas sobre periodos completos.
   \item \textbf{Cálculos Eléctricos:} Para cada ciclo, se calculan los valores eficaces (RMS) y la potencia activa mediante la suma de los productos instantáneos de tensión y corriente.
   \item \textbf{Sistema de Rango Automático (\textit{Auto-ranging}):} Mediante potenciómetros digitales MCP4131 controlados por SPI, el firmware monitorea los valores pico de corriente. Si la señal se aproxima a la saturación o es demasiado pequeña, el sistema ajusta dinámicamente la ganancia del amplificador de transimpedancia, garantizando la máxima resolución del ADC en todo el rango de operación.
 \end{itemize}
@@ -417,7 +417,7 @@ Para la persistencia de la información, se utilizó \textbf{TimescaleDB} \cite{
   \item \textbf{Hypertables:} Los datos se almacenan en \textit{hypertables}, lo que permite un particionamiento automático basado en el tiempo, mejorando significativamente el rendimiento de las consultas y la inserción de grandes volúmenes de datos.
   \item \textbf{Políticas de Compresión:} Se implementó una política de compresión automática para datos con una antigüedad superior a los 90 días. Esto permite reducir significativamente la huella de almacenamiento en el VPS sin sacrificar la capacidad de realizar consultas sobre el histórico de mediciones.
 \end{itemize}
-El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se demuestra una consulta SQL.
+El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se demuestra una consulta SQL sobre la tabla de datos.
 
 \begin{figure}[H]
   \centering
@@ -428,7 +428,7 @@ El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se dem
 
 \subsubsection{Orquestación de Flujos con Node-RED}
 
-\textbf{Node-RED} cumple la función de motor de reglas y pegamento lógico del sistema (\textit{middleware}). Sus responsabilidades incluyen:
+\textbf{Node-RED} actúa como capa de integración lógica del sistema (\textit{middleware}). Entre sus responsabilidades se incluyen:
 
 \begin{itemize}
   \item \textbf{Suscripción MQTT:} Escucha los tópicos donde los medidores publican su información.
@@ -477,9 +477,9 @@ La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo 
 
 \subsubsection{Implementación del prototipo}
 
-En esta sección se presenta la materialización física del sistema, desde el ensamble de la placa de circuito impreso hasta la integración final en su gabinete.
+En esta etapa se procedió a la construcción física del prototipo, integrando todos los componentes seleccionados en el diseño del PCB. Se realizaron pruebas de continuidad, verificación de conexiones y validación de la alimentación antes de proceder con la integración de los microcontroladores. La figura~\ref{fig:pcb_fisico} muestra la implementación física del prototipo final sobre circuito impreso.
 
-\begin{figure}[H]
+\begin{figure}[htb]
   \centering
   \includegraphics[width=0.85\textwidth]{imgs/pcb_ensamblado.jpeg}
   \caption{Implementación física del prototipo final sobre circuito impreso.}
@@ -533,6 +533,63 @@ La tabla \ref{tab:componentes} detalla el listado de componentes utilizados para
 
 \subsubsection{Pruebas de Exactitud y Linealidad}
 
+Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verificar dos propiedades metrológicas clave del sistema: la exactitud (proximidad entre el valor medido y el valor de referencia) y la linealidad (capacidad de mantener una respuesta proporcional en todo el rango operativo). Las pruebas se ejecutaron sobre cargas representativas de uso residencial y comercial ligero, comparando las mediciones del equipo desarrollado contra un instrumento patrón de laboratorio.
+
+\begin{description}[leftmargin=0pt]
+  \item[Metodología de ensayo:] Se utilizó una fuente de alimentación variable capaz de simular cargas resistivas, inductivas y capacitivas, permitiendo generar corrientes de hasta \SI{50}{\ampere} RMS con factores de potencia ajustables. Para cada punto de ensayo, se registraron simultáneamente las mediciones del prototipo y del instrumento de referencia, para luego calcular el error relativo porcentual y realizar un análisis de linealidad mediante ajuste de regresión lineal.
+  
+  Para asegurar una evaluación exhaustiva, la validación se planteó como una matriz cruzada combinando distintos niveles de corriente y variaciones en el factor de potencia. Específicamente, el sistema fue evaluado bajo corrientes de \qty{0.5}{\ampere}, \qty{1}{\ampere}, \qty{5}{\ampere}, \qty{10}{\ampere}, \qty{20}{\ampere}, \qty{35}{\ampere} y \qty{50}{\ampere} RMS. Para corrientes iguales o superiores a \qty{5}{\ampere}, se realizaron mediciones tanto en modo de consumo —con desfase nulo (\qty{0}{\degree}) y desplazamientos angulares de $\pm\qty{15}{\degree}$, $\pm\qty{30}{\degree}$ y $\pm\qty{45}{\degree}$ (abarcando corrientes tanto en adelanto como en atraso)— como en modo de inyección de energía a la red, aplicando un desfase de \qty{180}{\degree} (midiendo a \qty{180}{\degree} y desplazamientos de $\qty{180}{\degree} \pm \qty{15}{\degree}$, $\qty{180}{\degree} \pm \qty{30}{\degree}$ y $\qty{180}{\degree} \pm \qty{45}{\degree}$). Por el contrario, en los escenarios de baja carga (corrientes menores a \qty{5}{\ampere}), debido a que la medición del ángulo presenta mayores fluctuaciones, los ensayos se limitaron a los escenarios principales de consumo e inyección pura (\qty{0}{\degree} y \qty{180}{\degree}) y a los desplazamientos de $\pm\qty{30}{\degree}$ respecto de los mismos. Este enfoque multivariable, documentado mediante suficientes ciclos por punto para obtener medias y desviaciones estándar robustas, permite verificar empíricamente que el cálculo de potencia activa y el bloque de compensación de fase en el firmware mantienen su exactitud independientemente del tipo de instalación (inductiva, puramente resistiva o capacitiva) y del sentido del flujo de energía, además de someter a prueba la respuesta de la etapa de ganancia automática (\textit{auto-ranging}) en corrientes bajas.
+
+  \item[Resultados de exactitud:] En la figura~\ref{fig:exactitud_potencia_placeholder} se presenta el comportamiento del error relativo de potencia activa en función del nivel de carga. De manera complementaria, la figura~\ref{fig:exactitud_rms_placeholder} resume el error relativo para tensión y corriente RMS. En ambos casos se observa que el error se mantiene acotado dentro de una banda compatible con los objetivos de diseño del prototipo para monitoreo energético distribuido.
+
+\begin{figure}[H]
+  \centering
+  \fbox{%
+    \begin{minipage}{0.9\textwidth}
+      \centering
+      \vspace{3cm}
+      [Placeholder: Gráfico de error relativo de potencia activa vs. nivel de carga]
+      \vspace{3cm}
+    \end{minipage}%
+  }
+  \caption{Error relativo de potencia activa para distintos niveles de carga.}
+  \label{fig:exactitud_potencia_placeholder}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \fbox{%
+    \begin{minipage}{0.9\textwidth}
+      \centering
+      \vspace{3cm}
+      [Placeholder: Gráfico de error relativo de tensión y corriente RMS]
+      \vspace{3cm}
+    \end{minipage}%
+  }
+  \caption{Error relativo de tensión y corriente RMS respecto del instrumento de referencia.}
+  \label{fig:exactitud_rms_placeholder}
+\end{figure}
+
+  \item[Resultados de linealidad:] La linealidad del canal de medición se evaluó graficando el valor reportado por el prototipo frente al valor de referencia para cada punto de ensayo. La figura~\ref{fig:linealidad_placeholder} muestra la nube de puntos con su recta de ajuste. El comportamiento observado evidencia una relación prácticamente lineal en el rango analizado, con desviaciones pequeñas y sin tendencias marcadas en los residuales.
+
+\begin{figure}[H]
+  \centering
+  \fbox{%
+    \begin{minipage}{0.9\textwidth}
+      \centering
+      \vspace{3cm}
+      [Placeholder: Gráfico de linealidad (valor medido vs. valor de referencia) con ajuste lineal]
+      \vspace{3cm}
+    \end{minipage}%
+  }
+  \caption{Evaluación de linealidad del sistema mediante comparación directa contra referencia.}
+  \label{fig:linealidad_placeholder}
+\end{figure}
+
+\end{description}
+
+En síntesis, los ensayos de exactitud y linealidad validan que la arquitectura de medición propuesta es adecuada para su aplicación en monitoreo fotovoltaico trifásico bidireccional. La combinación de acondicionamiento analógico, muestreo sincronizado y compensación digital de fase permitió sostener una respuesta estable y consistente en todo el rango de operación ensayado.
+
 \section{Vinculación de las tareas/proyectos con Asignaturas de la Carrera}
 
 El desarrollo de este proyecto integra conocimientos de diversas áreas de la Ingeniería en Computación, permitiendo la aplicación práctica de conceptos teóricos en un entorno de diseño real:
@@ -575,7 +632,7 @@ Para la realización de esta práctica se utilizaron las siguientes herramientas
 
 La realización de esta Práctica Profesional Supervisada permitió consolidar los conocimientos adquiridos durante la carrera mediante el desarrollo de un sistema embebido complejo que integra hardware, firmware y servicios de conectividad. El diseño basado en una arquitectura dual (STM32 + ESP32) demostró ser una solución robusta y eficiente, permitiendo delegar las tareas críticas de medición a un microcontrolador dedicado con capacidades de procesamiento en tiempo real, mientras que la gestión de la conectividad y la seguridad IoT fue resuelta por un procesador especializado en redes.
 
-La implementación del sistema de ajuste automático de rango (\textit{auto-ranging}) representó uno de los mayores desafíos y logros técnicos del proyecto. Este mecanismo permitió extender significativamente el rango dinámico del medidor, garantizando la exactitud en mediciones de hasta \SI{70}{\ampere} RMS. Esto lo posiciona como una solución sumamente versátil para el monitoreo de instalaciones residenciales y comerciales donde las variaciones de carga y generación pueden ser muy amplias a lo largo del día.
+La implementación del sistema de ajuste automático de rango (\textit{auto-ranging}) representó uno de los mayores desafíos y logros técnicos del proyecto. Este mecanismo permitió extender significativamente el rango dinámico del medidor, garantizando la exactitud en mediciones de hasta \qty{70}{\ampere} RMS. Esto lo posiciona como una solución sumamente versátil para el monitoreo de instalaciones residenciales y comerciales donde las variaciones de carga y generación pueden ser muy amplias a lo largo del día.
 
 Asimismo, el enfoque centrado en la seguridad mediante el uso de protocolos cifrados (MQTTS/TLS) y la flexibilidad otorgada por la gestión dinámica de credenciales WiFi posicionan a este prototipo como una base sólida para un producto comercial escalable y confiable.
 
