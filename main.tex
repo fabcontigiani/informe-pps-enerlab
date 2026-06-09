@@ -194,13 +194,12 @@ La implementación del control dinámico de ganancia permite mantener linealidad
 
 \subsubsection{Diseño del Esquema Eléctrico y Circuito Impreso (PCB)}
 
-Para la integración física de los componentes y la validación del prototipo, se diseñó un circuito impreso (PCB) utilizando la herramienta de diseño electrónico automatizado (EDA) \textbf{KiCad}, cuyo diagrama esquemático se presenta en la figura~\ref{fig:pcb_schematic}.
-
+Para la integración física de los componentes y la validación del prototipo, se diseñó un circuito impreso (PCB) utilizando la herramienta de diseño electrónico automatizado (EDA) \textbf{KiCad}, cuyo diagrama esquemático general se presenta en la figura~\ref{fig:pcb_schematic}. Cabe destacar que el análisis detallado del esquema eléctrico se delega al informe de Práctica Profesional Supervisada (PPS) del estudiante Francisco Moglia, colaborador en este desarrollo.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{imgs/esquematico_kicad.pdf}
-  \caption{Diagrama esquemático del sistema de medición y gateway.}
+  \caption{Diagrama esquemático general del sistema de medición y gateway.}
   \label{fig:pcb_schematic}
 \end{figure}
 
@@ -555,7 +554,7 @@ La tabla \ref{tab:componentes} detalla el listado de componentes utilizados para
 Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verificar dos propiedades metrológicas clave del sistema: la exactitud (proximidad entre el valor medido y el valor de referencia) y la linealidad (capacidad de mantener una respuesta proporcional en todo el rango operativo). Las pruebas se ejecutaron sobre cargas representativas de uso residencial y comercial ligero, comparando las mediciones del equipo desarrollado contra un instrumento patrón de laboratorio.
 
 \begin{description}[leftmargin=0pt]
-  \item[Metodología de ensayo:] Los ensayos se estructuraron en dos etapas diferenciadas haciendo uso de una fuente de alimentación variable capaz de simular cargas resistivas y reactivas, comparando las lecturas del prototipo con las de la fuente. Con el fin de evaluar la respuesta del sistema tanto en consumo como en inyección, se registraron mediciones con flujos de corriente en ambos sentidos (desfases de \qty{0}{\degree} y \qty{180}{\degree}, respectivamente) y bajo desfases angulares de \qty{10}{\degree} y \qty{45}{\degree} en todos los escenarios. Las dos etapas de ensayo se definieron de la siguiente manera:
+  \item[Metodología de ensayo:] Los ensayos se estructuraron en dos etapas diferenciadas haciendo uso de un par de fuentes de CA regenerativas \textbf{Chroma 61815}, una operando como generador y la otra como carga, para simular de manera controlada flujos de potencia activa y reactiva bidireccionales. Las mediciones reportadas por el prototipo se compararon contra los registros de referencia de las fuentes. Con el fin de evaluar la respuesta del sistema tanto en consumo como en inyección, se registraron mediciones con flujos de corriente en ambos sentidos (desfases de \qty{0}{\degree} y \qty{180}{\degree}, respectivamente) y bajo desfases angulares de \qty{10}{\degree} y \qty{45}{\degree} en todos los escenarios. Las dos etapas de ensayo se definieron de la siguiente manera:
         \begin{itemize}
           \item \textbf{Primera etapa (Configuración Trifásica):} Se configuró la fuente en modalidad trifásica para evaluar el sistema en condiciones realistas de funcionamiento. En esta fase se ensayaron corrientes de \qty{0.6}{\ampere}, \qty{2}{\ampere}, \qty{5}{\ampere}, \qty{10}{\ampere} y \qty{15}{\ampere}. La corriente máxima en esta etapa se limitó a \qty{15}{\ampere} debido a restricciones en la entrega de potencia de la fuente en su configuración trifásica.
           \item \textbf{Segunda etapa (Configuración Monofásica en Paralelo):} Con el propósito de verificar el comportamiento del dispositivo ante corrientes mayores, se reconfiguró la fuente en modo monofásico, puenteando la salida para alimentar de forma síncrona las tres fases del prototipo. Esto permitió evaluar cargas de \qty{5}{\ampere}, \qty{25}{\ampere} y \qty{50}{\ampere}.
@@ -564,17 +563,17 @@ Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verif
   \item[Resultados de los ensayos:] Los resultados de error relativo y linealidad obtenidos para las corrientes y desfases ensayados en ambas etapas se presentan gráficamente en la figura~\ref{fig:resultados_trifasica} (para la etapa de ensayo trifásica) y en la figura~\ref{fig:resultados_monofasica} (para la etapa de ensayo monofásica de alta potencia). En ambas configuraciones, se observa que la respuesta del sistema se mantiene estable tanto para condiciones de inyección como de consumo, demostrando la consistencia de los algoritmos de cálculo e integración de señales implementados en el prototipo.
 \end{description}
 
-\begin{figure}[H]
+\begin{figure}[htb]
   \centering
   \includegraphics[width=0.9\textwidth]{imgs/resultados_trifasica.png}
-  \caption{Curvas de error y linealidad obtenidas en la primera etapa de ensayos con alimentación trifásica (\qty{0.6}{\ampere} a \qty{15}{\ampere}).}
+  \caption{Distribución del error relativo de potencia activa (eje Y) frente a la corriente nominal de referencia (eje X) en la primera etapa de ensayos (\qty{0.6}{\ampere} a \qty{15}{\ampere}).}
   \label{fig:resultados_trifasica}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[htb]
   \centering
   \includegraphics[width=0.9\textwidth]{imgs/resultados_monofasica.png}
-  \caption{Curvas de error y linealidad obtenidas en la segunda etapa de ensayos con alimentación monofásica en paralelo (\qty{5}{\ampere} a \qty{50}{\ampere}).}
+  \caption{Distribución del error relativo de potencia activa (eje Y) frente a la corriente nominal de referencia (eje X) en la segunda etapa de ensayos (\qty{5}{\ampere} a \qty{50}{\ampere}).}
   \label{fig:resultados_monofasica}
 \end{figure}
 
@@ -583,11 +582,11 @@ Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verif
 El análisis cuantitativo de los datos consolidados en los ensayos permite extraer las siguientes conclusiones sobre el comportamiento del sistema de medición:
 
 \begin{itemize}
-  \item \textbf{Comportamiento ante Baja Carga:} En la primera etapa (figura~\ref{fig:resultados_trifasica}), para una corriente de \qty{0.6}{\ampere}, se observa una mayor dispersión y magnitud en los errores relativos. Específicamente, en el modo de consumo los errores son de signo positivo (mediana entre \qty{7}{\percent} y \qty{8}{\percent}), mientras que en el modo de inyección los errores se tornan negativos (mediana entre \qty{-6}{\percent} y \qty{-12}{\percent}). Este cambio de signo opuesto al invertir el flujo de potencia es indicativo de la presencia de un desvío constante (\textit{offset} o bias) en el canal de lectura de corriente o en el procesamiento analógico de la señal.
+  \item \textbf{Comportamiento ante Baja Carga:} En la primera etapa (figura~\ref{fig:resultados_trifasica}), para una corriente de \qty{0.6}{\ampere}, se observa una mayor dispersión y magnitud en los errores relativos. Específicamente, en el modo de consumo los errores son de signo positivo (mediana entre \qty{7}{\percent} y \qty{8}{\percent}), mientras que en el modo de inyección los errores se tornan negativos (mediana entre \qty{-6}{\percent} y \qty{-12}{\percent}). Este comportamiento con signos opuestos según el sentido del flujo de potencia representa una desviación que requiere ser corregida mediante calibración.
   \item \textbf{Estabilización en Carga Media y Alta:} A partir de corrientes superiores a \qty{2}{\ampere}, las lecturas se estabilizan significativamente, reduciendo la dispersión. En el rango de \qty{2}{\ampere} a \qty{15}{\ampere} (figura~\ref{fig:resultados_trifasica}), la mediana del error relativo se mantiene acotada dentro de la banda de $\pm\qty{4}{\percent}$, alcanzando el comportamiento más estrecho (rango inter-cuartil de aproximadamente \qty{1}{\percent} a \qty{2}{\percent} de dispersión) al aproximarse a los \qty{15}{\ampere}.
   \item \textbf{Evaluación en Escala Ampliada:} En la segunda etapa (figura~\ref{fig:resultados_monofasica}), el error relativo se mantiene muy reducido, oscilando en torno al $\pm\qty{1}{\percent}$ para corrientes de \qty{5}{\ampere} y \qty{25}{\ampere}. Esto demuestra que la técnica de conmutación de ganancia automática (\textit{auto-ranging}) y las constantes de calibración operan de manera óptima en el rango de consumo intermedio.
-  \item \textbf{Desviación a Alta Carga:} Al alcanzar los \qty{50}{\ampere} (figura~\ref{fig:resultados_monofasica}), se aprecia un desplazamiento sistemático de los errores: en consumo los errores se vuelven negativos (mediana entre \qty{-1.5}{\percent} y \qty{-2.6}{\percent}) y en inyección se vuelven positivos (mediana entre \qty{1.0}{\percent} y \qty{2.0}{\percent}). Este comportamiento indica una subestimación sistemática en la magnitud de la potencia calculada.
-  \item \textbf{Ajuste de Fase y Dispersión entre Canales:} El hecho de que la dispersión de los errores se mantenga reducida incluso bajo desfases exigentes de \qty{10}{\degree} y \qty{45}{\degree} valida la efectividad del algoritmo de compensación de desfase implementado en el firmware. Por otro lado, la Fase~3 muestra de forma consistente errores ligeramente más positivos (o menos negativos) que las Fases~1 y 2, evidenciando un desbalance menor en la ganancia de hardware de este canal de adquisición que requiere calibración fina.
+  \item \textbf{Desviación a Alta Carga:} Al alcanzar los \qty{50}{\ampere} (figura~\ref{fig:resultados_monofasica}), se aprecia un desplazamiento sistemático de los errores: en consumo los errores se vuelven negativos (mediana entre \qty{-1.5}{\percent} y \qty{-2.6}{\percent}) y en inyección se vuelven positivos (mediana entre \qty{1.0}{\percent} y \qty{2.0}{\percent}). Este comportamiento evidencia una desviación sistemática en los límites superiores de carga que requiere ser abordada en futuros trabajos de ajuste.
+  \item \textbf{Ajuste de Fase y Dispersión entre Canales:} El hecho de que la dispersión de los errores se mantenga reducida incluso bajo desfases exigentes de \qty{10}{\degree} y \qty{45}{\degree} valida la efectividad del algoritmo de compensación de desfase implementado en el firmware. Por otro lado, la Fase~3 muestra de forma consistente errores ligeramente más positivos (o menos negativos) que las Fases~1 y 2, lo que resalta la necesidad de realizar una calibración fina de este canal de adquisición.
 \end{itemize}
 
 En síntesis, si bien los ensayos de exactitud y linealidad validan la viabilidad de la arquitectura propuesta para el monitoreo fotovoltaico bidireccional, los desvíos observados en los extremos del rango operativo indican la necesidad de continuar trabajando en la calibración y el refinamiento de la etapa analógica para alcanzar un mayor grado de precisión y exactitud en la medición. Por otro lado, cabe destacar que durante la totalidad de estos ensayos se verificó el correcto funcionamiento de la infraestructura de comunicación y almacenamiento: la totalidad de los datos de medición fue transmitida con éxito y de manera remota a la base de datos a través de los servicios descritos, demostrando que el subsistema IoT operó según los requerimientos de diseño establecidos.
@@ -612,7 +611,8 @@ Para la realización de esta práctica se utilizaron las siguientes herramientas
     \begin{itemize}
       \item \textbf{Osciloscopio Digital:} Utilizado para la visualización de las formas de onda de tensión y corriente, verificación de la integridad de las señales acondicionadas y medición precisa de los tiempos de retardo de fase.
       \item \textbf{Multímetro Digital:} Empleado para la calibración de los sensores y la verificación de niveles de tensión en las etapas de alimentación y acondicionamiento.
-      \item \textbf{Fuente de Alimentación Regulada:} Utilizada para el suministro de energía a las etapas analógicas y digitales durante las pruebas de prototipado.
+      \item \textbf{Fuentes de CA Regenerativas Chroma 61815:} Un par de simuladores de red configurados en contrafase (uno operando como fuente de tensión y corriente, y el otro como carga regenerativa) para evaluar la respuesta del medidor ante flujos bidireccionales de potencia activa y reactiva.
+      \item \textbf{Fuente de Alimentación de CC Regulada:} Utilizada para el suministro de energía a las etapas analógicas y de control durante el desarrollo del prototipo.
       \item \textbf{Estación de Soldadura y Herramientas de Prototipado:} Para el montaje del hardware en placas de desarrollo y circuitos impresos experimentales.
     \end{itemize}
   \item \textbf{Componentes de Hardware del Sistema:}
@@ -632,13 +632,13 @@ Para la realización de esta práctica se utilizaron las siguientes herramientas
 
 \section{Conclusiones}
 
-La realización de esta Práctica Profesional Supervisada permitió consolidar los conocimientos adquiridos durante la carrera mediante el desarrollo de un sistema embebido complejo que integra hardware, firmware y servicios de conectividad. El diseño basado en una arquitectura dual (STM32 + ESP32) demostró ser una solución robusta y eficiente, permitiendo delegar las tareas críticas de medición a un microcontrolador dedicado con capacidades de procesamiento en tiempo real, mientras que la gestión de la conectividad y la seguridad IoT fue resuelta por un procesador especializado en redes.
+La realización de esta Práctica Profesional Supervisada permitió consolidar los conocimientos adquiridos durante la carrera mediante el diseño, implementación y validación de un sistema embebido de monitoreo de energía con conectividad segura. La arquitectura de procesamiento dual propuesta (STM32 + ESP32-C3) demostró ser una solución adecuada: la delegación de las tareas críticas de muestreo sincronizado y cálculo matemático de variables eléctricas en el STM32 (aprovechando sus convertidores ADC independientes) garantizó la precisión temporal de las mediciones, mientras que el módulo ESP32-C3 asumió con solidez la pila de comunicaciones y la seguridad criptográfica, sin interferir en los procesos en tiempo real.
 
-La implementación del sistema de ajuste automático de rango (\textit{auto-ranging}) representó uno de los mayores desafíos y logros técnicos del proyecto. Este mecanismo permitió extender significativamente el rango dinámico del medidor, garantizando la exactitud en mediciones de hasta \qty{70}{\ampere} RMS. Esto lo posiciona como una solución sumamente versátil para el monitoreo de instalaciones residenciales y comerciales donde las variaciones de carga y generación pueden ser muy amplias a lo largo del día.
+Los ensayos metrológicos realizados bajo diferentes niveles de carga (hasta \qty{50}{\ampere}) y desfases angulares permitieron caracterizar el comportamiento del sistema e identificar las desviaciones presentes en los extremos del rango operativo, concretamente en baja corriente (\qty{0.6}{\ampere}) y en corrientes elevadas (\qty{50}{\ampere}). Estos resultados demuestran la necesidad de continuar trabajando en el proceso de calibración y ajuste del prototipo para mitigar estas desviaciones y alcanzar un mayor nivel de exactitud y precisión en todo el rango dinámico.
 
-Asimismo, el enfoque centrado en la seguridad mediante el uso de protocolos cifrados (MQTTS/TLS) y la flexibilidad otorgada por la gestión dinámica de credenciales WiFi posicionan a este prototipo como una base sólida para un producto comercial escalable y confiable.
+En cuanto al subsistema de conectividad e infraestructura, la validación experimental confirmó el funcionamiento exitoso de la integración de red. A pesar de que el prototipo físico se encuentra en fase experimental de desarrollo, la totalidad de los ensayos metrológicos fue transmitida en tiempo real de forma segura mediante MQTTS/TLS hacia la nube, logrando la ingesta correcta de datos en TimescaleDB y su visualización a través de Grafana. Esto confirma la viabilidad del esquema de backend dockerizado propuesto para entornos de monitoreo remoto multi-usuario.
 
-Como trabajo futuro, se contempla la posibilidad de migrar la etapa de adquisición de señales hacia circuitos integrados especializados en medición de energía (\textit{AFE - Analog Front End}) como los de la familia MCP3903/MCP3913. La utilización de estos integrados simplificaría notablemente el diseño del hardware al integrar convertidores de alta resolución y funciones de cálculo nativas, facilitando la producción a escala del dispositivo. Cabe destacar que, si bien se evaluó esta opción, se optó por la solución discreta actual basada en el STM32 debido a la escasa disponibilidad de dichos integrados especializados al momento de la ejecución del proyecto.
+Como trabajo futuro, se proyecta la migración desde la etapa analógica discreta actual hacia un circuito integrado especializado en medición de energía (\textit{AFE - Analog Front End}) de la familia MCP3903 o MCP3913. Esta transición simplificaría significativamente el diseño del hardware al integrar convertidores analógico-digitales de alta resolución y funciones de cálculo específicas de forma nativa, facilitando la fabricación y el ensamblado a escala del dispositivo. Cabe destacar que esta alternativa fue evaluada en la fase de diseño inicial del proyecto, pero su implementación se postergó debido a la baja disponibilidad en el mercado local de dichos componentes especializados al momento del desarrollo.
 
 \nocite{*}
 \printbibliography[heading=bibnumbered,title=Bibliografía]
@@ -658,53 +658,35 @@ Todo el material desarrollado para este proyecto, incluyendo el firmware de los 
 
   \item \textbf{Proyecto KiCad (Hardware y PCB):} Archivos de diseño esquemático, ruteo del PCB y modelos 3D del hardware. \\ \url{https://github.com/fabcontigiani/kicad-pps-enerlab}
 \end{itemize}
+
 \section{Manual de Usuario y Guía Técnica}
 
-Este anexo proporciona las directrices necesarias para la correcta instalación física del dispositivo, su configuración lógica y el despliegue de la infraestructura de backend por parte del personal de la empresa.
+Este anexo proporciona las directrices necesarias para la configuración de la conectividad de red del dispositivo y el despliegue de la infraestructura de backend en la nube por parte del personal de la empresa, considerando que el prototipo físico de hardware se encuentra en fase de desarrollo.
 
-\subsection{Guía de Instalación y Conexión Eléctrica}
+\subsection{Conexión del ESP32 a la Red Wi-Fi}
 
-Para asegurar la exactitud de las mediciones, el dispositivo debe conectarse siguiendo el esquema de fases de la instalación fotovoltaica:
-
-\begin{enumerate}
-  \item \textbf{Sensores de Corriente (SCT-013):} Deben abrazar los conductores de fase antes de la entrada al tablero principal. Es fundamental respetar la dirección de la flecha grabada en el sensor (apuntando hacia la carga) para evitar lecturas de potencia invertidas.
-  \item \textbf{Conexión de Tensión y Neutro:} El dispositivo cuenta con un conector para las tres fases y el neutro. No se requiere cableado adicional para los transformadores internos, basta con insertar el conector correspondiente asegurando un contacto firme para una medición de tensión segura.
-  \item \textbf{Alimentación:} El medidor es un sistema autónomo que se alimenta directamente de la Fase 1, no se requiere de una fuente de alimentación externa adicional, ya que el hardware integra su propia etapa de alimentación.
-\end{enumerate}
-
-% \begin{figure}[H]
-%   \centering
-%   \fbox{
-%     \begin{minipage}{0.6\textwidth} \centering \vspace{2cm} [Esquema/Fotografía: Conexión de sensores y alimentación] \vspace{2cm}
-%   \end{minipage}}
-%   \caption{Diagrama de conexión física del medidor en el tablero eléctrico.}
-%   \label{fig:manual_instalacion}
-% \end{figure}
-
-\subsection{Configuración Inicial del Dispositivo}
-
-Una vez energizado por primera vez, el medidor entrará en modo de configuración automática:
+La puesta en marcha inicial del firmware se centra en establecer la conectividad a la red del módulo de comunicaciones ESP32. Una vez energizado el módulo, el proceso de vinculación se realiza de la siguiente manera:
 
 \begin{enumerate}
-  \item \textbf{Conexión al AP:} Desde un dispositivo móvil o PC, buscar la red Wi-Fi denominada \texttt{Enerlab WiFiManager} e ingresar la clave \texttt{password}, la cual es configurable en el código fuente y puede ser modificada por la empresa.
-  \item \textbf{Portal Cautivo:} Al conectarse, se abrirá automáticamente un portal web. En caso de que esto no ocurra, navegar a \url{http://enerlab.local} o a la dirección IP \texttt{192.168.4.1}.
-  \item \textbf{Configuración de Red:} Seleccionar la red Wi-Fi local, ingresar la contraseña y guardar. El dispositivo se reiniciará e intentará conectarse al broker MQTT configurado por defecto.
+  \item \textbf{Acceso al Punto de Acceso:} Desde un dispositivo móvil o PC, buscar la red Wi-Fi denominada \texttt{Enerlab WiFiManager} e ingresar la contraseña \texttt{password} (configurable en el código fuente).
+  \item \textbf{Portal Cautivo:} Al establecer la conexión, se abrirá automáticamente el portal de configuración. En caso contrario, abrir un navegador web e ingresar la dirección IP \texttt{192.168.4.1} o el dominio local \url{http://enerlab.local}.
+  \item \textbf{Configuración de Credenciales:} Seleccionar la red Wi-Fi de destino, ingresar su respectiva contraseña y guardar la configuración. El módulo ESP32 se reiniciará automáticamente e intentará conectarse a la red inalámbrica local y al broker MQTT preconfigurado.
 \end{enumerate}
 
-El proceso de vinculación del dispositivo a la red Wi-Fi local se detalla gráficamente en la figura~\ref{fig:portal_wifi_config} (página~\pageref{fig:portal_wifi_config}).
+El proceso de vinculación a la red se detalla gráficamente en la figura~\ref{fig:portal_wifi_config} (página~\pageref{fig:portal_wifi_config}).
 
-\subsection{Monitoreo y Diagnóstico Local}
+\subsubsection{Verificación de Conectividad y Diagnóstico Local}
 
-El usuario o instalador puede acceder a la interfaz de diagnóstico local ingresando \url{http://enerlab.local} o la dirección IP asignada al medidor en su navegador. Esta interfaz permite:
+Para validar que el módulo se ha conectado exitosamente y se comunica de forma correcta, es posible acceder a la interfaz de diagnóstico local navegando a \url{http://enerlab.local} (o a la dirección IP asignada por el enrutador local). Esta interfaz permite:
 \begin{itemize}
-  \item Visualizar el estado de la comunicación con el broker MQTT.
-  \item Verificar las versiones de firmware instaladas.
-  \item Consultar los \textit{logs} de errores en tiempo real almacenados en la memoria interna.
+  \item Confirmar el estado de la comunicación y sincronización con el broker MQTT remoto.
+  \item Verificar las versiones de firmware cargadas en el sistema.
+  \item Inspeccionar los registros de eventos e informes de error en tiempo real.
 \end{itemize}
 
-La pantalla de estado y diagnóstico accesible vía mDNS se ilustra en la figura~\ref{fig:web_monitoreo} (página~\pageref{fig:web_monitoreo}).
+Dicha pantalla de diagnóstico se ilustra en la figura~\ref{fig:web_monitoreo} (página~\pageref{fig:web_monitoreo}).
 
-\subsection{Guía para la Empresa: Despliegue de Servicios y Gestión}
+\subsection{Despliegue del Sistema en la Nube (Backend)}
 
 El despliegue del backend se realiza de forma centralizada mediante Docker, siguiendo un flujo de trabajo que garantiza la seguridad y la portabilidad:
 
@@ -720,12 +702,12 @@ El despliegue del backend se realiza de forma centralizada mediante Docker, sigu
       \item Definir el dominio base en el \texttt{.env} para que el servicio SWAG gestione automáticamente los certificados TLS.
       \item \textbf{Intervención Manual en Mosquitto:} Dado que el servicio de mensajería no soporta variables de entorno en su configuración nativa, se debe editar manualmente el archivo \texttt{mosquitto/config/mosquitto.conf} para actualizar las rutas de los certificados (\texttt{cafile}, \texttt{certfile}, \texttt{keyfile}) con el nombre del dominio seleccionado.
     \end{itemize}
-  \item \textbf{Despliegue:} Ejecutar \texttt{docker-compose up -d}. Esto levantará automáticamente la base de datos TimescaleDB, el broker MQTT, Node-RED, Grafana y el proxy inverso.
+  \item \textbf{Despliegue:} Ejecutar el comando \texttt{docker-compose up -d}. Esto levantará automáticamente la base de datos TimescaleDB, el broker MQTT, Node-RED, Grafana y el proxy inverso.
   \item \textbf{Gestión de Usuarios en Grafana:}
     \begin{itemize}
       \item Acceder al panel de administración de Grafana.
-      \item Crear \textit{Organizations} independientes para cada cliente.
-      \item Asignar usuarios con rol de \textit{Viewer} a sus respectivas organizaciones para asegurar que solo tengan acceso a sus \textit{dashboards}, manteniendo la privacidad de la información entre clientes de la empresa. Para más detalles sobre la configuración avanzada, consultar la documentación oficial de Grafana sobre \href{https://grafana.com/docs/grafana/latest/administration/user-management/}{gestión de usuarios}, \href{https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/}{roles y permisos}.
+      \item Crear organizaciones (\textit{Organizations}) independientes para cada cliente.
+      \item Asignar usuarios con rol de visualizador (\textit{Viewer}) a sus respectivas organizaciones para asegurar que solo tengan acceso a sus propios tableros, manteniendo la privacidad de la información entre clientes de la empresa. Para más detalles sobre la configuración avanzada, consultar la documentación oficial de Grafana sobre \href{https://grafana.com/docs/grafana/latest/administration/user-management/}{gestión de usuarios}, \href{https://grafana.com/docs/grafana/latest/administration/roles-and-permissions/}{roles y permisos}.
     \end{itemize}
 \end{enumerate}
 
