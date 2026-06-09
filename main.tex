@@ -132,11 +132,11 @@ Considerando que se dedicarán 10 horas semanales a este trabajo, serán requeri
 
 Las actividades a desarrollar en esta PPS serán:
 \begin{enumerate}
-  \item \textbf{Análisis del problema:} Se llevará a cabo el estudio de las soluciones, tanto comerciales como no comerciales, para comprender el funcionamiento de medidores similares, en términos de su operación, los niveles de tensión y corriente que pueden soportar. Además, se analizará la viabilidad de distintas estrategias para el almacenamiento y visualización de datos, incluyendo esquemas centralizados y distribuidos.
-  \item \textbf{Diseño:} El primer paso será caracterizar los parámetros eléctricos a medir y en base a ello seleccionar los componentes adecuados, como ser: microcontrolador, circuitos de alimentación y sensado de tensión y corriente, entre otros. Luego se realizará un esquema del circuito tentativo a partir del cual serán realizadas algunas pruebas de laboratorio para verificar su operación. Con los resultados anteriores se diseñará el circuito definitivo. A partir del mismo se desarrollará el circuito impreso correspondiente, elaborando una lista de componentes/materiales para su compra. El firmware requerido para el medidor será desarrollado en forma paralela a lo mencionado. El firmware permitirá al usuario configurar aspectos básicos del medidor, tales como la conexión a la red local y la introducción de credenciales para el envío de datos al servidor remoto. Para la publicación de los datos medidos, se desarrollará una interfaz web compatible con dispositivos móviles, facilitando la accesibilidad a la información registrada.
-  \item \textbf{Construcción:} En esta etapa se procederá a la fabricación del dispositivo, asegurando su capacidad para realizar las mediciones establecidas. Además, se continuará con el desarrollo del firmware del dispositivo, asegurando que los parámetros eléctricos medidos sean convertidos a un formato compatible para su transmisión al servidor remoto, ya sea para su almacenamiento y/o visualización, y que la comunicación se realiza de manera cifrada protegiendo el acceso a los datos.
-  \item \textbf{Ensayos y puesta a punto:} En esta instancia se realizarán los ensayos necesarios para asegurar que el sistema desarrollado (medidor - interfaz web de usuario - almacenamiento - visualización en servidor remoto) funcione correctamente y de acuerdo a los requerimientos de la empresa. Algunos de los ensayos a realizar serán sobre la exactitud de la medición, el desempeño ante diferentes tipos de cargas, valor mínimo capaz de medir, entre otros.
-  \item \textbf{Redacción del informe:} El informe se realizará a medida que las actividades de la PPS son desarrolladas, a modo de que finalizada la práctica pueda presentarse una versión completa del mismo para que los tutores puedan realizar la corrección.
+  \item \textbf{Análisis del problema:} Se llevará a cabo el estudio de las soluciones, tanto comerciales como no comerciales, para comprender el funcionamiento de dispositivos similares, analizando sus rangos operativos de tensión y corriente. Además, se evaluará la viabilidad de distintas estrategias para el almacenamiento y visualización de datos, incluyendo esquemas centralizados y distribuidos.
+  \item \textbf{Diseño:} El primer paso consiste en caracterizar los parámetros eléctricos a medir y, sobre esta base, seleccionar los componentes adecuados, tales como el microcontrolador, los circuitos de alimentación y los sistemas de adquisición de tensión y corriente. Luego, se realizará un esquema del circuito tentativo a partir del cual se efectuarán ensayos preliminares de laboratorio para verificar su operación. Con los resultados obtenidos, se diseñará el circuito definitivo, a partir del cual se desarrollará el circuito impreso correspondiente y se elaborará el listado de materiales para su adquisición. El desarrollo del firmware requerido para el medidor se realizará en paralelo con el diseño del hardware. Dicho firmware permitirá al usuario configurar aspectos básicos del medidor, tales como la conexión a la red local y la introducción de credenciales para el envío de datos al servidor remoto. Para la publicación de los datos medidos, se desarrollará una interfaz web compatible con dispositivos móviles, facilitando la accesibilidad a la información registrada.
+  \item \textbf{Construcción:} En esta etapa se procederá a la fabricación física del dispositivo, asegurando su capacidad para realizar las mediciones establecidas. Asimismo, se continuará con el desarrollo del firmware, garantizando que los parámetros eléctricos medidos sean convertidos a un formato compatible para su transmisión al servidor remoto para su almacenamiento y visualización, y que la comunicación se realice mediante canales cifrados que protejan la integridad y confidencialidad de la información.
+  \item \textbf{Ensayos y puesta a punto:} En esta instancia se realizarán los ensayos necesarios para asegurar que la totalidad del sistema integrado (medidor, interfaz web, base de datos y visualización) funcione correctamente y de acuerdo con los requerimientos de la empresa. Las pruebas comprenderán ensayos de exactitud, linealidad bajo diferentes tipos de cargas y determinación del umbral mínimo de detección.
+  \item \textbf{Redacción del informe:} La redacción del informe se realizará de forma progresiva a la par del desarrollo de las actividades de la PPS, con el fin de que, al concluir la práctica, se disponga de una versión completa del documento para la correspondiente revisión por parte de los tutores.
 \end{enumerate}
 
 % \section{Descripción de la Institución / Empresa}
@@ -180,7 +180,6 @@ La elección de los microcontroladores centrales se basó en la división de tar
 
 \subsubsection{Acondicionamiento de Señal y Auto-ranging}
 
-La captura del panel de control de la base de datos en pgAdmin, con una consulta de ejemplo, se muestra en la figura~\ref{fig:db_schema}.
 Para maximizar la precisión en un amplio espectro de potencias, se implementó una etapa de acondicionamiento de señal activa con capacidad de ajuste de rango automático (\textit{auto-ranging}). Esta estrategia es fundamental para resolver el compromiso tecnológico entre la resolución necesaria para medir cargas pequeñas y el rango dinámico requerido para potencias elevadas.
 
 El sistema utiliza potenciómetros digitales \textbf{MCP4131} \cite{mcp4131_ds} integrados en la etapa de realimentación de los amplificadores operacionales \textbf{LMV324}. El firmware del STM32F103 monitorea continuamente los valores de pico de la señal de corriente en cada fase. Si la amplitud de la señal cae por debajo de un umbral predefinido, el microcontrolador incrementa la ganancia del amplificador mediante el bus SPI, permitiendo que señales pequeñas ocupen una mayor porción del rango del ADC (\qty{0}{\volt} a \qty{3.3}{\volt}). Inversamente, ante un incremento de la carga que amenace con saturar el ADC, el sistema reduce la ganancia de forma inmediata para evitar el truncamiento (\textit{clipping}) de la forma de onda.
@@ -191,6 +190,8 @@ La implementación del control dinámico de ganancia permite mantener linealidad
 
 
 \subsubsection{Etapa de Comunicaciones y Gateway}
+
+La etapa de comunicaciones se basa en el módulo ESP32-C3, el cual actúa como pasarela de datos (\textit{gateway}) entre el núcleo de medición local y la infraestructura en la nube. Desde el punto de vista del hardware, el ESP32-C3 recibe alimentación de la línea de \qty{5}{\volt} provista por la fuente HLK-5M05 y establece comunicación con el STM32F103 a través de un canal serie UART bidireccional. Esta interfaz física permite la transferencia de tramas JSON estructuradas con los valores de medición calculados. El diseño del circuito impreso prevé la orientación del módulo para evitar obstrucciones en la antena de RF integrada, asegurando la calidad de la señal Wi-Fi.
 
 \subsubsection{Diseño del Esquema Eléctrico y Circuito Impreso (PCB)}
 
@@ -207,7 +208,7 @@ En el Anexo \ref{sec:anexo_pcb} se presentan capturas adicionales del diseño, i
 
 \subsection{Caracterización y Ensayo de Sensores}
 
-El desempeño del medidor está íntimamente ligado a la respuesta de los sensores de tensión y corriente. Para ambos sensores, el \textbf{SCT-013} y el \textbf{ZMPT101B}, sus hojas de datos incorporan información suficiente para conocer sus linealidades dentro del rango de carga de interés para este proyecto. Sin embargo, se identificó que era necesario un estudio con mayor detenimiento para caracterizar con precisión los retardos de fase introducidos por los sensores y sus respectivos circuitos de acondicionamiento, ya que estos son críticos para el cálculo de la potencia activa y el factor de potencia.
+El desempeño del medidor se encuentra condicionado por la respuesta de los sensores de tensión y corriente. Para ambos dispositivos (el transformador de corriente \textbf{SCT-013} y el transformador de tensión \textbf{ZMPT101B}), sus respectivas hojas de especificaciones técnicas proveen información suficiente para caracterizar su linealidad dentro del rango operativo del proyecto. Sin embargo, se determinó la necesidad de realizar un análisis detallado para cuantificar con precisión los retardos de fase introducidos por los sensores y sus etapas de acondicionamiento asociadas, dado que estos parámetros resultan críticos para el cálculo de la potencia activa y el factor de potencia.
 
 \subsubsection{Metodología}
 
@@ -311,7 +312,7 @@ El núcleo de medición se basa en un STM32F103 que ejecuta un bucle de procesam
 El ESP32-C3 actúa como puente entre el hardware de medición y la infraestructura en la nube. Sus funciones principales son:
 
 \begin{itemize}
-  \item \textbf{Gestión de Conectividad:} Utiliza la librería \textit{WiFiManager} para permitir al usuario configurar las credenciales de red mediante un portal cautivo, evitando la necesidad de hardcodear datos de acceso.
+  \item \textbf{Gestión de Conectividad:} Utiliza la librería \textit{WiFiManager} para permitir al usuario configurar las credenciales de red mediante un portal cautivo, evitando la necesidad de definir de forma estática los datos de acceso en el código fuente.
   \item \textbf{Seguridad en la Transmisión:} La comunicación con el servidor se realiza mediante el protocolo MQTTS \cite{mqtt_spec}. Se integra el certificado raíz de \textit{Let's Encrypt} para validar la identidad del broker y establecer un túnel cifrado TLS 1.2.
 
   \item \textbf{Intercambio de Datos:} Recibe tramas JSON desde el STM32 vía UART, las procesa para añadir metadatos de diagnóstico y las publica en tópicos MQTT estructurados por la dirección MAC del dispositivo.
@@ -421,6 +422,9 @@ El despliegue se orquestó mediante \textbf{Docker Compose}, integrando los sigu
 \begin{itemize}
   \item \textbf{SWAG (Nginx + Let's Encrypt):} Actúa como servidor proxy inverso y gestiona automáticamente los certificados SSL/TLS, permitiendo el acceso seguro vía HTTPS a todos los servicios internos.
   \item \textbf{Mosquitto (MQTT Broker):} Centraliza la recepción de los mensajes enviados por los dispositivos en campo. Se configuró para soportar conexiones cifradas (\textit{MQTTS}) utilizando los certificados generados por SWAG.
+  \item \textbf{TimescaleDB:} Base de datos de series temporales, basada en PostgreSQL, donde se almacenan de forma persistente y eficiente los registros de medición.
+  \item \textbf{Node-RED:} Motor de flujos que actúa como \textit{middleware} para suscribirse a los tópicos MQTT, procesar las tramas JSON entrantes e insertarlas en la base de datos.
+  \item \textbf{Grafana:} Plataforma web interactiva utilizada para la visualización de datos en tiempo real, generación de tableros de control e implementaciones de control de acceso.
   \item \textbf{pgAdmin:} Herramienta de gestión gráfica para la base de datos, facilitando las tareas de administración y consulta de datos.
 \end{itemize}
 
