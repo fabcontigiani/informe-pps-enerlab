@@ -321,16 +321,30 @@ A nivel de firmware, las ecuaciones y el flujo de procesamiento digital implemen
         \begin{equation}
           P = \left( \frac{1}{N} \sum_{n=0}^{N-1} v[n] \cdot i[n] \right) \cdot \text{Factor}_v \cdot \text{Factor}_i
         \end{equation}
-  \item \textbf{Potencia Reactiva ($Q$):} Se calcula la componente fundamental de la potencia reactiva aplicando la Transformada de Fourier Discreta (DFT) para un bin único ($k=1$, correspondiente a los \qty{50}{\hertz} nominales). A partir de los componentes reales e imaginarios obtenidos de la tensión ($v_{\text{re}}, v_{\text{im}}$) y la corriente ($i_{\text{re}}, i_{\text{im}}$), se calcula la potencia en VAr aplicando los factores de escala:
+  \item \textbf{Potencia Aparente ($S$):} Se calcula directamente a partir del producto de los valores eficaces de tensión y corriente:
         \begin{equation}
-          Q = \left[ 0,5 \cdot (v_{\text{im}} \cdot i_{\text{re}} - v_{\text{re}} \cdot i_{\text{im}}) \right] \cdot \text{Factor}_v \cdot \text{Factor}_i
+          S = V_{\text{rms}} \cdot I_{\text{rms}}
         \end{equation}
-        De igual manera que la potencia activa, el resultado se escala a VAr utilizando los factores de escala físicos.
-  \item \textbf{Potencia Aparente ($S$), Factor de Potencia ($FP$) y Ángulo de Fase ($\phi$):} Se calculan promediando los valores de $V_{\text{rms}}$, $I_{\text{rms}}$, $P$ y $Q$ sobre un número definido de ciclos para filtrar ruidos. La potencia aparente se define como $S = V_{\text{rms}} \cdot I_{\text{rms}}$ y el factor de potencia como $FP = P/S$. Para el desfase, se calcula inicialmente el ángulo mediante el arcocoseno:
+  \item \textbf{Factor de Potencia ($FP$) y Ángulo de Fase ($\phi$):} Se calculan promediando los valores obtenidos en los ciclos anteriores para filtrar ruidos. El factor de potencia se define como $FP = P/S$. Para el desfase, se calcula inicialmente la magnitud del ángulo mediante el arcocoseno:
         \begin{equation}
-          \phi = \arccos\left(\frac{P}{S}\right)
+          \phi_{\text{mag}} = \arccos\left(\frac{P}{S}\right)
         \end{equation}
-        El resultado de la función arcocoseno está acotado matemáticamente al rango de $[0, 180^{\circ}]$, lo que restringe el ángulo a los cuadrantes I y II (valores de fase positivos). Para extender el cálculo a los cuatro cuadrantes (rango de $[-180^{\circ}, 180^{\circ}]$) y determinar si la corriente se encuentra adelantada respecto a la tensión (cuadrantes III y IV, de comportamiento capacitivo), se utiliza el signo de la potencia reactiva fundamental ($Q$) obtenida de la DFT de bin único: si $Q < -\qty{5}{\text{VAr}}$, se invierte el signo del ángulo ($\phi = -\arccos(P/S)$). Finalmente, se aplican bandas muertas de seguridad: ante una potencia activa $P$ dentro del rango de $\pm\qty{5}{\watt}$ el factor de potencia ($FP$) se fuerza a cero (tratándose como ausencia de señal de carga), y ante una potencia reactiva $Q$ dentro del rango de $\pm\qty{5}{\text{VAr}}$ el ángulo de desfase ($\phi$) se fuerza a cero (tratándose como una carga resistiva pura).
+        Para determinar el signo de dicho desfase (y por ende la polaridad del ángulo), se realiza la DFT de bin único sobre las señales digitales de tensión y corriente en la frecuencia fundamental ($k=1$, correspondiente a \qty{50}{\hertz}):
+        \begin{equation}
+          Q_{\text{DFT}} = \left[ 0,5 \cdot (v_{\text{im}} \cdot i_{\text{re}} - v_{\text{re}} \cdot i_{\text{im}}) \right] \cdot \text{Factor}_v \cdot \text{Factor}_i
+        \end{equation}
+        Si $Q_{\text{DFT}} < -\qty{5}{\text{VAr}}$, se invierte el signo del ángulo ($\phi = -\phi_{\text{mag}}$), lo que corresponde a los cuadrantes III y IV (comportamiento capacitivo). De lo contrario, se mantiene positivo (comportamiento inductivo). Finalmente, se aplican bandas muertas de seguridad: ante una potencia activa $P$ dentro del rango de $\pm\qty{5}{\watt}$ el factor de potencia ($FP$) se fuerza a cero, y ante una potencia reactiva de bin único $Q_{\text{DFT}}$ dentro del rango de $\pm\qty{5}{\text{VAr}}$, el ángulo de desfase ($\phi$) se fuerza a cero.
+  \item \textbf{Potencia Reactiva ($Q$):} Se calcula a partir de la potencia aparente ($S$) y el seno del ángulo de desfase ($\phi$):
+        \begin{equation}
+          Q = S \cdot \sin(\phi)
+        \end{equation}
+        El signo de $Q$ (inductivo para $Q > 0$ y capacitivo para $Q < 0$) queda determinado por el signo de $\phi$. Si se activa la banda muerta del ángulo ($\phi = 0$), la potencia reactiva resultante se fuerza a cero.
+\end{itemize}
+
+Esta metodología híbrida para la determinación del desfasaje y la potencia reactiva responde a limitaciones matemáticas y consideraciones prácticas de diseño del sistema embebido:
+\begin{itemize}
+  \item \textbf{Limitación matemática del arcocoseno:} Debido a que la función coseno es par ($\cos(\phi) = \cos(-\phi)$), la función inversa $\arccos(x)$ se encuentra restringida al rango de $[0, 180^{\circ}]$ (cuadrantes I y II). Por lo tanto, no es posible determinar si la corriente está adelantada (comportamiento capacitivo, $\phi < 0$) o retrasada (comportamiento inductivo, $\phi > 0$) respecto a la tensión utilizando únicamente la relación de potencia activa y aparente. El signo de la componente fundamental $Q_{\text{DFT}}$ (calculada mediante la DFT de bin único) aporta la dirección del flujo de energía reactiva, permitiendo extender el rango del ángulo de desfase a los cuatro cuadrantes ($[-180^{\circ}, 180^{\circ}]$).
+  \item \textbf{Consistencia y simplificación de la calibración:} Calcular la magnitud de la potencia reactiva a través del triángulo de potencias mediante $Q = S \cdot \sin(\phi)$ (equivalente a la magnitud de $\sqrt{S^2 - P^2}$) asegura que los cálculos se mantengan acotados por los valores eficaces globales. Además, presenta una gran ventaja en el proceso de calibración del instrumento: la magnitud de $Q$ hereda de forma directa las constantes de calibración aplicadas a $V_{\text{rms}}$, $I_{\text{rms}}$ y $P$, evitando tener que calibrar un factor de escala adicional para la magnitud de la DFT de forma aislada en el firmware.
 \end{itemize}
 
 \subsubsection{Gateway IoT y Seguridad (ESP32-C3)}
