@@ -15,13 +15,13 @@
 \usepackage{float}
 \usepackage{longtable,multirow,booktabs}
 \usepackage{wrapfig}
-\usepackage{biblatex}
+\usepackage[style=ieee, sorting=none]{biblatex}
 \addbibresource{referencias.bib}
 
 \usepackage{multicol}
 \usepackage{caption}
-\captionsetup[figure]{labelfont={bf}}
-\captionsetup[table]{labelfont={bf}}
+\captionsetup[figure]{labelfont={bf}, justification=centering}
+\captionsetup[table]{labelfont={bf}, justification=centering}
 \usepackage[]{sidecap}
 \usepackage{adjustbox}
 \usepackage{parskip}
@@ -51,8 +51,9 @@
 \newcommand{\myGrupo}{2}
 \newcommand{\mySemester}{2024-2}
 \newcommand{\MyReport}{Informe de PPS}
-\newcommand{\myUnidad}{Desarrollo de medidor bidireccional trifásico e implementación de servicios IoT para monitoreo fotovoltaico}
-\newcommand{\myDate}{13 de diciembre de 2024}
+\newcommand{\myUnidad}{Desarrollo de un medidor de energía trifásico bidireccional para monitoreo a distancia de generador fotovoltaico conectado a la red 
+eléctrica de baja tensión}
+\newcommand{\myDate}{\today}
 \newcommand{\myName}{Fabrizio Martin Contigiani}
 \newcommand{\myTeacher}{}
 
@@ -92,7 +93,7 @@
 
 \section{Resumen}
 
-Este informe detalla el diseño y la implementación de un medidor de energía trifásico bidireccional inteligente, orientado al monitoreo de instalaciones fotovoltaicas. La solución emplea una arquitectura dual basada en los microcontroladores STM32F103, responsable de la adquisición de señales y el cálculo preciso de parámetros eléctricos (RMS, potencia activa, factor de potencia), y ESP32-C3, encargado de la conectividad IoT. El sistema incluye un mecanismo de ajuste de rango automático (\textit{auto-ranging}) mediante potenciómetros digitales para optimizar la precisión en diversos niveles de carga. La transmisión de datos se realiza de manera segura hacia un servidor remoto utilizando el protocolo MQTTS con cifrado TLS, permitiendo la visualización y el análisis remoto del flujo energético en tiempo real.
+Este informe detalla el diseño y la implementación de un medidor de energía trifásico bidireccional, orientado al monitoreo de instalaciones fotovoltaicas. La solución emplea una arquitectura dual basada en los microcontroladores STM32F103, responsable de la adquisición de señales y el cálculo preciso de parámetros eléctricos (RMS, potencia activa, factor de potencia), y ESP32-C3, encargado de la conectividad IoT. El sistema incluye un mecanismo de ajuste de rango automático (\textit{auto-ranging}) mediante potenciómetros digitales para optimizar la precisión en diversos niveles de corriente de carga. La transmisión de datos se realiza de manera segura hacia un servidor remoto utilizando el protocolo MQTT con cifrado TLS, permitiendo la visualización y el análisis remoto del flujo energético en tiempo real.
 
 \section{Plan de Trabajo Presentado}
 
@@ -102,11 +103,16 @@ Diseñar e implementar el prototipo de un medidor de energía trifásico bidirec
 
 \subsection{Cronograma y descripción de las actividades}
 
-Considerando que se dedicarán 10 horas semanales a este trabajo, serán requeridas 20 semanas para acumular 200 horas de trabajo, estipuladas para la PPS.
+Considerando que se dedicarán 10 horas semanales a este trabajo, serán requeridas 20 semanas para acumular 200 horas de trabajo, estipuladas para la PPS. La tabla \ref{tab:cronograma} muestra las actividades realizadas en esta práctica y el tiempo dedicado a cada una.
 
-\begin{table}[h]
+Las actividades a desarrollar en esta PPS serán:
+\begin{enumerate}
+  \item \textbf{Análisis del problema:} Se llevará a cabo el estudio de las soluciones, tanto comerciales como no comerciales, para comprender el funcionamiento de dispositivos similares, analizando sus rangos operativos de tensión y corriente. Además, se evaluará la viabilidad de distintas estrategias para el almacenamiento y visualización de datos, incluyendo esquemas centralizados y distribuidos.
+
+\begin{table}[H]
   \centering\small
-  \caption{Cronograma tentativo de actividades a realizar en la PPS.}
+  \caption{Cronograma de actividades a realizar en la PPS.}
+  \label{tab:cronograma}
   \begin{tblr}{
       colspec = {l X *{10}{Q[c, 0.9cm]}},
       hlines, vlines,
@@ -129,10 +135,6 @@ Considerando que se dedicarán 10 horas semanales a este trabajo, serán requeri
     5         & Redacción del informe    &          &          &          &          &           &            &            &            &            &            \\
   \end{tblr}
 \end{table}
-
-Las actividades a desarrollar en esta PPS serán:
-\begin{enumerate}
-  \item \textbf{Análisis del problema:} Se llevará a cabo el estudio de las soluciones, tanto comerciales como no comerciales, para comprender el funcionamiento de dispositivos similares, analizando sus rangos operativos de tensión y corriente. Además, se evaluará la viabilidad de distintas estrategias para el almacenamiento y visualización de datos, incluyendo esquemas centralizados y distribuidos.
   \item \textbf{Diseño:} El primer paso consiste en caracterizar los parámetros eléctricos a medir y, sobre esta base, seleccionar los componentes adecuados, tales como el microcontrolador, los circuitos de alimentación y los sistemas de adquisición de tensión y corriente. Luego, se realizará un esquema del circuito tentativo a partir del cual se efectuarán ensayos preliminares de laboratorio para verificar su operación. Con los resultados obtenidos, se diseñará el circuito definitivo, a partir del cual se desarrollará el circuito impreso correspondiente y se elaborará el listado de materiales para su adquisición. El desarrollo del firmware requerido para el medidor se realizará en paralelo con el diseño del hardware. Dicho firmware permitirá al usuario configurar aspectos básicos del medidor, tales como la conexión a la red local y la introducción de credenciales para el envío de datos al servidor remoto. Para la publicación de los datos medidos, se desarrollará una interfaz web compatible con dispositivos móviles, facilitando la accesibilidad a la información registrada.
   \item \textbf{Construcción:} En esta etapa se procederá a la fabricación física del dispositivo, asegurando su capacidad para realizar las mediciones establecidas. Asimismo, se continuará con el desarrollo del firmware, garantizando que los parámetros eléctricos medidos sean convertidos a un formato compatible para su transmisión al servidor remoto para su almacenamiento y visualización, y que la comunicación se realice mediante canales cifrados que protejan la integridad y confidencialidad de la información.
   \item \textbf{Ensayos y puesta a punto:} En esta instancia se realizarán los ensayos necesarios para asegurar que la totalidad del sistema integrado (medidor, interfaz web, base de datos y visualización) funcione correctamente y de acuerdo con los requerimientos de la empresa. Las pruebas comprenderán ensayos de exactitud, linealidad bajo diferentes tipos de cargas y determinación del umbral mínimo de detección.
@@ -149,9 +151,11 @@ Las actividades a desarrollar en esta PPS serán:
 
 En el contexto actual de transición hacia fuentes de energía renovables, la generación distribuida mediante paneles fotovoltaicos ha cobrado gran relevancia. Para gestionar eficientemente estas instalaciones, es imprescindible contar con herramientas de monitoreo que permitan conocer no solo el consumo de la red, sino también la energía excedente inyectada a la misma.
 
-Este trabajo aborda el diseño y desarrollo de un prototipo de medidor de energía trifásico bidireccional, compatible con ecosistemas de Internet de las Cosas (IoT), que equilibra viabilidad económica y precisión de medida. El dispositivo realiza la adquisición y procesamiento de variables eléctricas fundamentales, al tiempo que gestiona de manera segura la conectividad de red. Un aspecto relevante de la implementación propuesta radica en su resolución para bajas potencias (inferiores a \qty{500}{\watt}), manteniendo a su vez un rango dinámico amplio para corrientes elevadas. Esto contrasta con el comportamiento de ciertos instrumentos comerciales de referencia \cite{shelly_pro_3em}, los cuales implementan zonas muertas (\textit{deadbands}) para cargas bajas, omitiendo el registro de consumos menores. Para soslayar esta limitación, el presente diseño incorpora una técnica de ajuste automático de rango (\textit{auto-ranging}) que maximiza el aprovechamiento del convertidor analógico-digital (ADC), posibilitando la monitorización del flujo energético a bajas intensidades sin comprometer el fondo de escala. En las secciones siguientes, se detallan las etapas de diseño, construcción, calibración y validación del sistema.
+Este trabajo aborda el diseño y desarrollo de un prototipo de medidor de energía trifásico bidireccional, compatible con ecosistemas de Internet de las Cosas (IoT), que equilibra viabilidad económica y precisión de medida. El dispositivo realiza la adquisición y procesamiento de variables eléctricas fundamentales, al tiempo que gestiona de manera segura la conectividad de red. Un aspecto relevante de la implementación propuesta radica en su buena resolución para bajas potencias (inferiores a \qty{500}{\watt}), manteniendo a su vez un rango dinámico amplio para corrientes elevadas. Esto contrasta con el comportamiento de ciertos instrumentos comerciales de referencia \cite{shelly_pro_3em}, los cuales implementan zonas muertas (\textit{deadbands}) para cargas bajas, omitiendo el registro de consumos menores. Para soslayar esta limitación, el presente diseño incorpora una técnica de ajuste automático de rango (\textit{auto-ranging}) que maximiza el aprovechamiento del convertidor analógico-digital (ADC), posibilitando la monitorización del flujo energético a bajas intensidades sin comprometer el fondo de escala.
 
-El dispositivo se enfoca específicamente en la medición de la carga neta (\textit{net load}), posicionándose físicamente entre la red eléctrica de distribución y la instalación interna del usuario (ya sea un hogar, oficina o industria). Esta ubicación estratégica, como se ilustra en la Figura \ref{fig:net_load_concept}, permite monitorear de forma bidireccional el flujo energético, discriminando entre el consumo de energía demandado a la red y la entrega de excedentes generados localmente hacia la misma.
+El dispositivo desarrollado se enfoca específicamente en la medición de la carga neta (\textit{net load}), posicionándose físicamente entre la red eléctrica de distribución y la instalación interna del usuario (ya sea un hogar, oficina o industria). Esta ubicación estratégica, como se ilustra en la Figura \ref{fig:net_load_concept}, permite monitorear de forma bidireccional el flujo energético, discriminando entre el consumo de energía demandado a la red y la entrega de excedentes generados localmente hacia la misma. Cabe destacar que este medidor no está orientado a la comercialización de energía eléctrica, sino que fue diseñado para que el usuario pueda monitorear la operación de su generador fotovoltaico (FV). Respecto a sus capacidades operativas, el medidor puede conectarse a una tensión de fase de hasta \qty{220}{\volt} y es capaz de medir corrientes de carga desde \qty{0.6}{\ampere} hasta \qty{70}{\ampere} eficaces.
+
+En las secciones siguientes, se detallan las etapas de diseño, construcción, calibración y validación del sistema.
 
 \begin{figure}[htbp]
   \centering
@@ -165,7 +169,7 @@ El dispositivo se enfoca específicamente en la medición de la carga neta (\tex
 
 \subsubsection{Selección de Componentes}
 
-La elección de los microcontroladores centrales se basó en la división de tareas entre la adquisición de datos de alta velocidad y la gestión de comunicaciones:
+La elección de los microcontroladores centrales se basó en la división de tareas entre la adquisición de datos de alta velocidad y la gestión de comunicaciones. Adicionalmente, se seleccionaron componentes clave para las etapas de acondicionamiento de señal, sensado y alimentación que integran el dispositivo. A continuación, se describen los elementos principales que componen el hardware del medidor desarrollado:
 
 \begin{itemize}
   \item \textbf{STM32F103 (Núcleo de Medición):} Microcontrolador basado en la arquitectura ARM Cortex-M3 de 32 bits \cite{st_rm0008}. El criterio técnico determinante para su selección fue la disponibilidad de dos convertidores analógico-digital (ADC) independientes. Esta característica permite configurar el modo de \textit{muestreo simultáneo}, asegurando la captura síncrona de las señales de tensión y corriente correspondientes a una misma fase. Dicha sincronización resulta indispensable para minimizar los errores de fase en el cálculo de potencia activa, reactiva y factor de potencia, magnitudes altamente sensibles a los desfasajes temporales introducidos por el sistema de adquisición.
@@ -185,13 +189,13 @@ Para maximizar la precisión en un amplio espectro de potencias, se implementó 
 El sistema utiliza potenciómetros digitales \textbf{MCP4131} \cite{mcp4131_ds} integrados en la etapa de realimentación de los amplificadores operacionales \textbf{LMV324}. El firmware del STM32F103 monitorea continuamente los valores de pico de la señal de corriente en cada fase. Si la amplitud de la señal cae por debajo de un umbral predefinido, el microcontrolador incrementa la ganancia del amplificador mediante el bus SPI, permitiendo que señales pequeñas ocupen una mayor porción del rango del ADC (\qty{0}{\volt} a \qty{3.3}{\volt}). Inversamente, ante un incremento de la carga que amenace con saturar el ADC, el sistema reduce la ganancia de forma inmediata para evitar el truncamiento (\textit{clipping}) de la forma de onda.
 
 
-La implementación del control dinámico de ganancia permite mantener linealidad y precisión en potencias inferiores a los \qty{500}{\watt}, conservando la capacidad de registrar valores máximos de hasta \qty{17.5}{\kilo\watt}. Esto confiere al instrumento una característica distintiva frente a soluciones comerciales consolidadas \cite{shelly_pro_3em}, las cuales implementan zonas muertas (\textit{deadbands}) que omiten el registro bajo ciertos umbrales de corriente, resultando en pérdidas de información sobre el consumo de la instalación.
+La implementación del control dinámico de ganancia permite mantener linealidad y precisión en potencias inferiores a los \qty{500}{VA}, conservando la capacidad de registrar valores máximos de hasta \qty{17.5}{kVA}. Esto confiere al medidor desarrollado una característica distintiva frente a soluciones comerciales consolidadas \cite{shelly_pro_3em}, las cuales implementan zonas muertas (\textit{deadbands}) que omiten el registro bajo ciertos umbrales de corriente, resultando en pérdidas de información sobre el consumo de la instalación.
 
 
 
 \subsubsection{Etapa de Comunicaciones y Gateway}
 
-La etapa de comunicaciones se basa en el módulo ESP32-C3, el cual actúa como pasarela de datos (\textit{gateway}) entre el núcleo de medición local y la infraestructura en la nube. Desde el punto de vista del hardware, el ESP32-C3 recibe alimentación de la línea de \qty{5}{\volt} provista por la fuente HLK-5M05 y establece comunicación con el STM32F103 a través de un canal serie UART bidireccional. Esta interfaz física permite la transferencia de tramas JSON estructuradas con los valores de medición calculados. El diseño del circuito impreso prevé la orientación del módulo para evitar obstrucciones en la antena de RF integrada, asegurando la calidad de la señal Wi-Fi.
+La etapa de comunicaciones se basa en el módulo ESP32-C3, el cual actúa como pasarela de datos (\textit{gateway}) entre el núcleo de medición local (STM32F103) y la infraestructura en la nube. Desde el punto de vista del hardware, el ESP32-C3 recibe alimentación de la línea de \qty{5}{\volt} provista por la fuente HLK-5M05 y establece comunicación con el STM32F103 a través de un canal serie UART bidireccional. Esta interfaz física permite la transferencia de tramas de texto en formato JSON estructuradas con los valores de medición calculados. El diseño del circuito impreso prevé la orientación del módulo para evitar obstrucciones en la antena de RF integrada, asegurando la calidad de la señal Wi-Fi.
 
 \subsubsection{Diseño del Esquema Eléctrico y Circuito Impreso (PCB)}
 
@@ -200,7 +204,7 @@ Para la integración física de los componentes y la validación del prototipo, 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{imgs/esquematico_kicad.pdf}
-  \caption{Diagrama esquemático general del sistema de medición y gateway.}
+  \caption{Diagrama esquemático general del sistema de medición y gateway (ver Anexo~\ref{sec:anexo_esquematico}).}
   \label{fig:pcb_schematic}
 \end{figure}
 
@@ -215,7 +219,7 @@ El desempeño del medidor se encuentra condicionado por la respuesta de los sens
 Con el objetivo de validar la respuesta del sistema ante diferentes condiciones de carga y tipos de señal, se llevó a cabo una etapa de ensayos utilizando una fuente de tensión alterna de \qty{220}{\volt} y variando la corriente de carga. Los ensayos se dividieron en dos escenarios principales:
 
 \begin{itemize}
-  \item \textbf{Escenario 1: Señal Senoidal Pura.} Se evaluó el desempeño con corrientes de \qty{10}{\ampere} y \qty{20}{\ampere}, manteniendo un factor de potencia unitario ($PF=1$) y un factor de cresta de 3 ($CF=3$). Se probaron configuraciones con la referencia del ADC centrada en \qty{1.65}{\volt} y referenciada a masa (GND).
+  \item \textbf{Escenario 1: Señal Senoidal Pura.} Se evaluó el desempeño con corrientes de \qty{10}{\ampere} y \qty{20}{\ampere}, manteniendo un factor de potencia unitario ($PF=1$) y un factor de cresta de 3 ($CF=3$).
   \item \textbf{Escenario 2: Señal Distorsionada.} Se aplicó una tensión de \qty{220}{\volt} con distorsión armónica y una carga de \qty{15}{\ampere} (con un ángulo de fase de \qty{0}{\degree}).
 \end{itemize}
 
@@ -303,13 +307,35 @@ El núcleo de medición se basa en un STM32F103 que ejecuta un bucle de procesam
 \begin{itemize}
   \item \textbf{Muestreo Sincronizado:} Se utiliza el temporizador \texttt{TIM3} para disparar la conversión del ADC a una frecuencia de \qty{5}{\kilo\hertz} por canal. La adquisición se realiza mediante DMA para minimizar la carga de la CPU.
   \item \textbf{Sincronización de Fase:} El sistema detecta los cruces por cero de la tensión en la fase 1 (utilizando un esquema de histéresis) para definir el inicio y fin de cada ciclo de red (\qty{50}{\hertz}). Esto permite realizar integraciones precisas sobre periodos completos.
-  \item \textbf{Cálculos Eléctricos:} Para cada ciclo, se calculan los valores eficaces (RMS) y la potencia activa mediante la suma de los productos instantáneos de tensión y corriente.
   \item \textbf{Sistema de Rango Automático (\textit{Auto-ranging}):} Mediante potenciómetros digitales MCP4131 controlados por SPI, el firmware monitorea los valores pico de corriente. Si la señal se aproxima a la saturación o es demasiado pequeña, el sistema ajusta dinámicamente la ganancia del amplificador de transimpedancia, garantizando la máxima resolución del ADC en todo el rango de operación.
+  \item \textbf{Cálculos Eléctricos:} Para cada ciclo de red, el firmware calcula localmente los valores eficaces (RMS) de tensión y corriente, así como las potencias activa y reactiva. Tras promediar estos valores sobre múltiples períodos, se obtienen la potencia aparente, el factor de potencia y el ángulo de desfase del sistema, cuyos fundamentos de cómputo y ecuaciones se detallan a continuación.
+\end{itemize}
+
+A nivel de firmware, las ecuaciones y el flujo de procesamiento digital implementados para la obtención de estas variables se estructuran de la siguiente manera:
+\begin{itemize}
+  \item \textbf{Valores Eficaces (RMS):} Se computan por ciclo a partir de las muestras del búfer de adquisición ($N$ muestras) y luego se convierten a unidades físicas aplicando los coeficientes de ganancia y calibración de los sensores de tensión ($V_{\text{rms}}$) y corriente ($I_{\text{rms}}$):
+        \begin{equation}
+          X_{\text{rms}} = \sqrt{\frac{1}{N} \sum_{n=0}^{N-1} x[n]^2}
+        \end{equation}
+  \item \textbf{Potencia Activa ($P$):} Se calcula en formato digital promediando el producto muestra a muestra de tensión y corriente (según la norma IEEE 1459-2010) y convirtiendo el valor resultante a Watts físicos mediante factores de escala:
+        \begin{equation}
+          P = \left( \frac{1}{N} \sum_{n=0}^{N-1} v[n] \cdot i[n] \right) \cdot \text{Factor}_v \cdot \text{Factor}_i
+        \end{equation}
+  \item \textbf{Potencia Reactiva ($Q$):} Se calcula la componente fundamental de la potencia reactiva aplicando la Transformada de Fourier Discreta (DFT) para un bin único ($k=1$, correspondiente a los \qty{50}{\hertz} nominales). A partir de los componentes reales e imaginarios obtenidos de la tensión ($v_{\text{re}}, v_{\text{im}}$) y la corriente ($i_{\text{re}}, i_{\text{im}}$), se calcula la potencia en VAr aplicando los factores de escala:
+        \begin{equation}
+          Q = \left[ 0,5 \cdot (v_{\text{im}} \cdot i_{\text{re}} - v_{\text{re}} \cdot i_{\text{im}}) \right] \cdot \text{Factor}_v \cdot \text{Factor}_i
+        \end{equation}
+        De igual manera que la potencia activa, el resultado se escala a VAr utilizando los factores de escala físicos.
+  \item \textbf{Potencia Aparente ($S$), Factor de Potencia ($FP$) y Ángulo de Fase ($\phi$):} Se calculan promediando los valores de $V_{\text{rms}}$, $I_{\text{rms}}$, $P$ y $Q$ sobre un número definido de ciclos para filtrar ruidos. La potencia aparente se define como $S = V_{\text{rms}} \cdot I_{\text{rms}}$ y el factor de potencia como $FP = P/S$. Para el desfase, se calcula inicialmente el ángulo mediante el arcocoseno:
+        \begin{equation}
+          \phi = \arccos\left(\frac{P}{S}\right)
+        \end{equation}
+        El resultado de la función arcocoseno está acotado matemáticamente al rango de $[0, 180^{\circ}]$, lo que restringe el ángulo a los cuadrantes I y II (valores de fase positivos). Para extender el cálculo a los cuatro cuadrantes (rango de $[-180^{\circ}, 180^{\circ}]$) y determinar si la corriente se encuentra adelantada respecto a la tensión (cuadrantes III y IV, de comportamiento capacitivo), se utiliza el signo de la potencia reactiva fundamental ($Q$) obtenida de la DFT de bin único: si $Q < -\qty{5}{\text{VAr}}$, se invierte el signo del ángulo ($\phi = -\arccos(P/S)$). Finalmente, se aplican bandas muertas de seguridad: ante una potencia activa $P$ dentro del rango de $\pm\qty{5}{\watt}$ el factor de potencia ($FP$) se fuerza a cero (tratándose como ausencia de señal de carga), y ante una potencia reactiva $Q$ dentro del rango de $\pm\qty{5}{\text{VAr}}$ el ángulo de desfase ($\phi$) se fuerza a cero (tratándose como una carga resistiva pura).
 \end{itemize}
 
 \subsubsection{Gateway IoT y Seguridad (ESP32-C3)}
 
-El ESP32-C3 actúa como puente entre el hardware de medición y la infraestructura en la nube. Sus funciones principales son:
+El ESP32-C3 actúa como puente entre el hardware de medición (STM32F103) y la infraestructura en la nube. Sus funciones principales son:
 
 \begin{itemize}
   \item \textbf{Gestión de Conectividad:} Utiliza la librería \textit{WiFiManager} para permitir al usuario configurar las credenciales de red mediante un portal cautivo, evitando la necesidad de definir de forma estática los datos de acceso en el código fuente.
@@ -353,7 +379,7 @@ El dispositivo implementa una interfaz de configuración y monitoreo local acces
     \caption{Confirmación de conexión exitosa.}
     \label{fig:portal_4}
   \end{subfigure}
-  \caption{Proceso de configuración inicial de Wi-Fi mediante el portal captivo.}
+  \caption{Proceso de configuración inicial de Wi-Fi mediante el portal captivo, a través de teléfono celular.}
   \label{fig:portal_wifi_config}
 \end{figure}
 
@@ -394,15 +420,15 @@ Previo a la implementación de los servicios remotos, se realizó un análisis d
   \item \textbf{Centralizada (Seleccionada):} Los datos se envían a un servidor remoto (VPS o Nube). Esta opción optimiza el costo del hardware del medidor y centraliza el mantenimiento, facilitando la escalabilidad del sistema.
 \end{itemize}
 
-En cuanto a la gestión de los servicios, se evaluaron las opciones \textit{Fully Managed} (servicios en la nube de terceros) frente a \textit{Self-Managed} (servidores propios). Para este prototipo, se optó por una arquitectura Centralizada y Self-Managed, desplegando microservicios mediante contenedores Docker en un VPS. Esta elección permite un control total sobre la soberanía de los datos y una reducción de costos operativos durante la etapa de desarrollo.
+En cuanto a la gestión de los servicios, se evaluaron las opciones \textit{Fully Managed} (servicios en la nube de terceros) frente a \textit{Self-Managed} (servidores propios). Para este prototipo, se optó por una arquitectura Centralizada y Self-Managed, desplegando microservicios mediante contenedores Docker \cite{docker_platform} en un VPS. Esta elección permite un control total sobre la soberanía de los datos y una reducción de costos operativos durante la etapa de desarrollo.
 
 No obstante, cabe destacar que la implementación definitiva en un entorno de producción será responsabilidad de la empresa. Será la organización quien, evaluando los recursos disponibles y la inversión proyectada, determine la arquitectura final. Esto incluye la selección de los mecanismos de resguardo y seguridad para la base de datos —la cual puede contener información sensible de los clientes—, garantizando así el cumplimiento de los estándares de protección de datos requeridos por la institución.
 
 La arquitectura de servicios remotos se diseñó bajo un enfoque de microservicios, utilizando contenedores Docker para garantizar la portabilidad y facilitar el despliegue en un entorno de Servidor Privado Virtual (VPS).
 
-\subsubsection{Infraestructura en la Nube y Dockerización}
+\subsubsection{Infraestructura en la Nube mediante Contenedores}
 
-La arquitectura general del sistema en la nube y los flujos de datos entre sus componentes principales se presentan en la figura~\ref{fig:arquitectura_cloud}. Esta topología se estructura en torno a tres entornos interconectados:
+La arquitectura general del sistema en la nube y los flujos de datos entre sus componentes principales se presentan en la figura~\ref{fig:arquitectura_cloud}. Esta topología está estructurada a través de tres entornos interconectados:
 
 \begin{figure}[htbp]
   \centering
@@ -420,11 +446,11 @@ La arquitectura general del sistema en la nube y los flujos de datos entre sus c
 El despliegue se orquestó mediante \textbf{Docker Compose}, integrando los siguientes servicios clave para el funcionamiento del sistema:
 
 \begin{itemize}
-  \item \textbf{SWAG (Nginx + Let's Encrypt):} Actúa como servidor proxy inverso y gestiona automáticamente los certificados SSL/TLS, permitiendo el acceso seguro vía HTTPS a todos los servicios internos.
-  \item \textbf{Mosquitto (MQTT Broker):} Centraliza la recepción de los mensajes enviados por los dispositivos en campo. Se configuró para soportar conexiones cifradas (\textit{MQTTS}) utilizando los certificados generados por SWAG.
-  \item \textbf{TimescaleDB:} Base de datos de series temporales, basada en PostgreSQL, donde se almacenan de forma persistente y eficiente los registros de medición.
-  \item \textbf{Node-RED:} Motor de flujos que actúa como \textit{middleware} para suscribirse a los tópicos MQTT, procesar las tramas JSON entrantes e insertarlas en la base de datos.
-  \item \textbf{Grafana:} Plataforma web interactiva utilizada para la visualización de datos en tiempo real, generación de tableros de control e implementaciones de control de acceso.
+  \item \textbf{SWAG (Nginx + Let's Encrypt):} Actúa como servidor proxy inverso y gestiona automáticamente los certificados SSL/TLS, permitiendo el acceso seguro vía HTTPS a todos los servicios internos \cite{swag_gateway}.
+  \item \textbf{Mosquitto (MQTT Broker):} Centraliza la recepción de los mensajes enviados por los dispositivos en campo. Se configuró para soportar conexiones cifradas (\textit{MQTTS}) utilizando los certificados generados por SWAG \cite{eclipse_mosquitto}.
+  \item \textbf{TimescaleDB:} Base de datos de series temporales, basada en PostgreSQL, donde se almacenan de forma persistente y eficiente los registros de medición \cite{timescaledb_docs}.
+  \item \textbf{Node-RED:} Motor de flujos que actúa como \textit{middleware} para suscribirse a los tópicos MQTT, procesar las tramas JSON entrantes e insertarlas en la base de datos \cite{nodered_platform}.
+  \item \textbf{Grafana:} Plataforma web interactiva utilizada para la visualización de datos en tiempo real, generación de tableros de control e implementaciones de control de acceso \cite{grafana_platform}.
   \item \textbf{pgAdmin:} Herramienta de gestión gráfica para la base de datos, facilitando las tareas de administración y consulta de datos.
 \end{itemize}
 
@@ -437,7 +463,7 @@ Para la persistencia de la información, se utilizó \textbf{TimescaleDB} \cite{
   \item \textbf{Hypertables:} Los datos se almacenan en \textit{hypertables}, lo que permite un particionamiento automático basado en el tiempo, mejorando significativamente el rendimiento de las consultas y la inserción de grandes volúmenes de datos.
   \item \textbf{Políticas de Compresión:} Se implementó una política de compresión automática para datos con una antigüedad superior a los 90 días. Esto permite reducir significativamente la huella de almacenamiento en el VPS sin sacrificar la capacidad de realizar consultas sobre el histórico de mediciones.
 \end{itemize}
-El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se demuestra una consulta SQL sobre la tabla de datos.
+El panel de control se ilustra en la figura~\ref{fig:db_schema}, la que muestra una consulta SQL sobre la tabla de datos.
 
 \begin{figure}[H]
   \centering
@@ -467,14 +493,7 @@ El panel de control se ilustra en la figura~\ref{fig:db_schema} en la que se dem
 
 La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo una visualización dinámica y en tiempo real de los parámetros eléctricos (como se muestra en la figura~\ref{fig:grafana_dashboard}):
 
-\begin{itemize}
-  \item \textbf{Dashboard Principal:} Muestra variables críticas como potencia activa total, tensiones de fase, corrientes y energía acumulada.
-  \item \textbf{Análisis Histórico:} Permite al usuario comparar consumos y generación fotovoltaica a lo largo de diferentes períodos de tiempo (día, semana, mes).
-  \item \textbf{Responsive Design:} El dashboard es accesible desde navegadores web y dispositivos móviles, adaptándose automáticamente al tamaño de pantalla.
-  \item \textbf{Gestión de Usuarios y Control de Acceso:} Se utiliza el sistema de autenticación de Grafana para gestionar diferentes niveles de permisos. Esta capacidad es clave para la empresa, ya que permite aislar los dashboards de cada cliente, asegurando que cada usuario final visualice únicamente la información perteneciente a su instalación fotovoltaica.
-\end{itemize}
-
-\begin{figure}[htb]
+\begin{figure}[H]
   \centering
   \begin{subfigure}[b]{0.48\textwidth}
     \centering
@@ -493,13 +512,21 @@ La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo 
   \label{fig:grafana_dashboard}
 \end{figure}
 
+\begin{itemize}
+  \item \textbf{Dashboard Principal:} Muestra variables críticas como potencia activa total, tensiones de fase, corrientes y energía acumulada.
+  \item \textbf{Análisis Histórico:} Permite al usuario comparar consumos y generación fotovoltaica a lo largo de diferentes períodos de tiempo (día, semana, mes).
+  \item \textbf{Responsive Design:} El dashboard es accesible desde navegadores web y dispositivos móviles, adaptándose automáticamente al tamaño de pantalla.
+  \item \textbf{Gestión de Usuarios y Control de Acceso:} Se utiliza el sistema de autenticación de Grafana para gestionar diferentes niveles de permisos. Esta capacidad es clave para la empresa, ya que permite aislar los dashboards de cada cliente, asegurando que cada usuario final visualice únicamente la información perteneciente a su instalación fotovoltaica.
+\end{itemize}
+
+
 \subsection{Ensayos y Resultados}
 
 En este apartado se presentan los resultados correspondientes a la construcción del prototipo físico y los ensayos orientados a validar el funcionamiento global de la integración de hardware y firmware. Cabe señalar que los análisis exhaustivos respecto a la caracterización de la exactitud y precisión de la medición del prototipo, sus curvas de calibración fina y ensayos extendidos bajo variaciones de carga son abordados en detalle en el informe de Práctica Profesional Supervisada (PPS) del estudiante Francisco Moglia, colaborador de este proyecto.
 
 \subsubsection{Implementación del prototipo}
 
-En esta etapa se procedió a la construcción física del prototipo, integrando todos los componentes seleccionados en el diseño del PCB. Se realizaron pruebas de continuidad, verificación de conexiones y validación de la alimentación antes de proceder con la integración de los microcontroladores. La figura~\ref{fig:pcb_fisico} muestra la implementación física del prototipo final sobre circuito impreso.
+En esta etapa se procedió a la construcción del prototipo, integrando todos los componentes seleccionados en el diseño del PCB. Se realizaron pruebas de continuidad, verificación de conexiones y validación de la alimentación antes de proceder con la integración de los microcontroladores. La figura~\ref{fig:pcb_fisico} muestra la implementación física del prototipo final sobre circuito impreso.
 
 \begin{figure}[htb]
   \centering
@@ -551,7 +578,7 @@ En esta etapa se procedió a la construcción física del prototipo, integrando 
   \end{tblr}
 \end{table}
 
-La tabla \ref{tab:componentes} detalla el listado de componentes utilizados para la construcción del dispositivo. El costo total de implementación se estima en aproximadamente ARS~\num{140500}, desglosado en ARS~\num{86500} para los componentes integrados directamente en la placa de circuito impreso (PCB) y ARS~\num{54000} correspondientes a los tres sensores de corriente externos SCT-013. Este valor refleja la inversión necesaria para la construcción de una unidad funcional como prototipo, considerando precios minoristas y costos de adquisición en el mercado local a la fecha de escritura. En una etapa de producción seriada, el costo por unidad se vería reducido por la optimización de procesos y compras por volumen.
+La tabla \ref{tab:componentes} detalla el listado de componentes utilizados para la construcción del dispositivo. El costo total de implementación se estima en aproximadamente ARS~\num{140500} (96 USD), desglosado en ARS~\num{86500} (59 USD) para los componentes integrados directamente en la placa de circuito impreso (PCB) y ARS~\num{54000} (37 USD) correspondientes a los tres sensores de corriente externos SCT-013. Este valor refleja la inversión necesaria para la construcción de una unidad funcional como prototipo, considerando precios minoristas y costos de adquisición en el mercado local a la fecha de escritura. Cabe destacar que este presupuesto contempla únicamente los componentes de hardware y materiales, por lo que no incluye el costo de la mano de obra asociada al ensamblado, soldadura y montaje del equipo. En una etapa de producción seriada, el costo por unidad se vería reducido por la optimización de procesos y compras por volumen.
 
 \subsubsection{Pruebas de Exactitud y Linealidad}
 
@@ -560,8 +587,8 @@ Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verif
 \begin{description}[leftmargin=0pt]
   \item[Metodología de ensayo:] Los ensayos se estructuraron en dos etapas diferenciadas haciendo uso de un par de fuentes de CA regenerativas \textbf{Chroma 61815}, una operando como fuente y la otra como carga, para simular de manera controlada flujos de potencia activa y reactiva bidireccionales. Las mediciones reportadas por el prototipo se compararon contra los registros de referencia de las fuentes. Con el fin de evaluar la respuesta del sistema tanto en consumo como en inyección, se registraron mediciones con flujos de corriente en ambos sentidos (desfases de \qty{0}{\degree} y \qty{180}{\degree}, respectivamente) y bajo desfases angulares de \qty{10}{\degree} y \qty{45}{\degree} en todos los escenarios. Las dos etapas de ensayo se definieron de la siguiente manera:
         \begin{itemize}
-          \item \textbf{Primera etapa (Configuración Trifásica):} Se configuró la fuente en modalidad trifásica para evaluar el sistema en condiciones realistas de funcionamiento. En esta fase se ensayaron corrientes de \qty{0.6}{\ampere}, \qty{2}{\ampere}, \qty{5}{\ampere}, \qty{10}{\ampere} y \qty{15}{\ampere}. La corriente máxima en esta etapa se limitó a \qty{15}{\ampere} debido a restricciones en la entrega de potencia de la fuente en su configuración trifásica.
-          \item \textbf{Segunda etapa (Configuración Monofásica en Paralelo):} Con el propósito de verificar el comportamiento del dispositivo ante corrientes mayores, se reconfiguró la fuente en modo monofásico, puenteando la salida para alimentar de forma síncrona las tres fases del prototipo. Esto permitió evaluar cargas de \qty{5}{\ampere}, \qty{25}{\ampere} y \qty{50}{\ampere}.
+          \item \textbf{Primera etapa (Configuración Trifásica):} Se configuró la fuente en modalidad trifásica para evaluar el sistema en condiciones realistas de funcionamiento. En esta fase se ensayaron corrientes eficaces de \qty{0.6}{\ampere}, \qty{2}{\ampere}, \qty{5}{\ampere}, \qty{10}{\ampere} y \qty{15}{\ampere}. La corriente máxima en esta etapa se limitó a \qty{15}{\ampere} debido a restricciones en la entrega de potencia de la fuente en su configuración trifásica.
+          \item \textbf{Segunda etapa (Configuración Monofásica en Paralelo):} Con el propósito de verificar el comportamiento del dispositivo ante corrientes mayores, se reconfiguró la fuente en modo monofásico, puenteando la salida para alimentar de forma síncrona las tres fases del prototipo. Esto permitió evaluar cargas de \qty{5}{\ampere}, \qty{25}{\ampere} y \qty{50}{\ampere} de corriente eficaz.
         \end{itemize}
 
   \item[Resultados de los ensayos:] Los resultados de error relativo y linealidad obtenidos para las corrientes y desfases ensayados en ambas etapas se presentan gráficamente en la figura~\ref{fig:resultados_trifasica} (para la etapa de ensayo trifásica) y en la figura~\ref{fig:resultados_monofasica} (para la etapa de ensayo monofásica de alta potencia). En ambas configuraciones, se observa que la respuesta del sistema se mantiene estable tanto para condiciones de inyección como de consumo, demostrando la consistencia de los algoritmos de cálculo e integración de señales implementados en el prototipo.
@@ -640,12 +667,18 @@ La realización de esta Práctica Profesional Supervisada permitió consolidar l
 
 Los ensayos metrológicos realizados bajo diferentes niveles de carga (hasta \qty{50}{\ampere}) y desfases angulares permitieron caracterizar el comportamiento del sistema e identificar las desviaciones presentes en los extremos del rango operativo, concretamente en baja corriente (\qty{0.6}{\ampere}) y en corrientes elevadas (\qty{50}{\ampere}). Estos resultados demuestran la necesidad de continuar trabajando en el proceso de calibración y ajuste del prototipo para mitigar estas desviaciones y alcanzar un mayor nivel de exactitud y precisión en todo el rango dinámico.
 
-En cuanto al subsistema de conectividad e infraestructura, la validación experimental confirmó el funcionamiento exitoso de la integración de red. A pesar de que el prototipo físico se encuentra en fase experimental de desarrollo, la totalidad de los ensayos metrológicos fue transmitida en tiempo real de forma segura mediante MQTTS/TLS hacia la nube, logrando la ingesta correcta de datos en TimescaleDB y su visualización a través de Grafana. Esto confirma la viabilidad del esquema de backend dockerizado propuesto para entornos de monitoreo remoto multi-usuario.
+En cuanto al subsistema de conectividad e infraestructura, la validación experimental confirmó el funcionamiento exitoso de la integración de red. A pesar de que el prototipo físico se encuentra en fase experimental de desarrollo, la totalidad de los ensayos metrológicos fue transmitida en tiempo real de forma segura mediante MQTTS/TLS hacia la nube, logrando la ingesta correcta de datos en TimescaleDB y su visualización a través de Grafana. Esto confirma la viabilidad del esquema de backend basado en contenedores propuesto para entornos de monitoreo remoto multi-usuario.
 
 Como trabajo futuro, se proyecta la migración desde la etapa analógica discreta actual hacia un circuito integrado especializado en medición de energía (\textit{AFE - Analog Front End}) de la familia MCP3903 o MCP3913. Esta transición simplificaría significativamente el diseño del hardware al integrar convertidores analógico-digitales de alta resolución y funciones de cálculo específicas de forma nativa, facilitando la fabricación y el ensamblado a escala del dispositivo. Cabe destacar que esta alternativa fue evaluada en la fase de diseño inicial del proyecto, pero su implementación se postergó debido a la baja disponibilidad en el mercado local de dichos componentes especializados al momento del desarrollo.
 
-\nocite{*}
+Finalmente, se expresa un sincero agradecimiento al Grupo de Investigación y Desarrollo en Electrónica (GIDE) por facilitar los instrumentos y el espacio físico para realizar los ensayos. Asimismo, se agradece a la empresa Enerlab por proponer la temática de este desarrollo y proveer parte de los componentes utilizados en el diseño del medidor.
+
 \printbibliography[heading=bibnumbered,title=Bibliografía]
+
+\clearpage
+\vspace*{0cm}
+\part*{Anexos}
+\addcontentsline{toc}{section}{Anexos}
 
 \appendix
 
@@ -663,6 +696,7 @@ Todo el material desarrollado para este proyecto, incluyendo el firmware de los 
   \item \textbf{Proyecto KiCad (Hardware y PCB):} Archivos de diseño esquemático, ruteo del PCB y modelos 3D del hardware. \\ \url{https://github.com/fabcontigiani/kicad-pps-enerlab}
 \end{itemize}
 
+\clearpage
 \section{Manual de Usuario y Guía Técnica}
 
 Este anexo proporciona las directrices necesarias para la configuración de la conectividad de red del dispositivo y el despliegue de la infraestructura de backend en la nube por parte del personal de la empresa, considerando que el prototipo físico de hardware se encuentra en fase de desarrollo.
@@ -715,6 +749,7 @@ El despliegue del backend se realiza de forma centralizada mediante Docker, sigu
     \end{itemize}
 \end{enumerate}
 
+\clearpage
 \section{Capturas del Diseño de PCB}
 \label{sec:anexo_pcb}
 
@@ -742,5 +777,13 @@ En esta sección se presentan las capturas detalladas del diseño del circuito i
   \caption{Renderizado 3D detallado de la placa ensamblada.}
   \label{fig:anexo_pcb_3d}
 \end{figure}
+
+\clearpage
+\section{Diagrama Esquemático (KiCad)}
+\label{sec:anexo_esquematico}
+
+En esta sección se presenta el diagrama esquemático completo del circuito del medidor de energía trifásico bidireccional desarrollado, el cual ha sido exportado de KiCad en formato PDF. Debido a sus dimensiones y nivel de detalle, se incluyen a continuación en dos páginas completas con orientación horizontal para facilitar su correcta visualización y lectura.
+
+\includepdf[pages=-, landscape=true]{output.pdf}
 
 \end{document}
