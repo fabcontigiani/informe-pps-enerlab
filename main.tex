@@ -325,13 +325,13 @@ A nivel de firmware, las ecuaciones y el flujo de procesamiento digital implemen
         \begin{equation}
           S = V_{\text{rms}} \cdot I_{\text{rms}}
         \end{equation}
-  \item \textbf{Factor de Potencia ($FP$) y Ángulo de Fase ($\phi$):} Se calculan promediando los valores obtenidos en los ciclos anteriores para filtrar ruidos. El factor de potencia se define como $FP = P/S$. Para el desfase, se calcula inicialmente la magnitud del ángulo mediante el arcocoseno:
+  \item \textbf{Factor de Potencia ($FP$) y Ángulo de Fase ($\phi$):} El factor de potencia se define como $FP = P/S$. Para el desfase, se calcula inicialmente la magnitud del ángulo mediante el arcocoseno:
         \begin{equation}
           \phi_{\text{mag}} = \arccos\left(\frac{P}{S}\right)
         \end{equation}
         Para determinar el signo de dicho desfase (y por ende la polaridad del ángulo), se realiza la DFT de bin único sobre las señales digitales de tensión y corriente en la frecuencia fundamental ($k=1$, correspondiente a \qty{50}{\hertz}):
         \begin{equation}
-          Q_{\text{DFT}} = \left[ 0,5 \cdot (v_{\text{im}} \cdot i_{\text{re}} - v_{\text{re}} \cdot i_{\text{im}}) \right] \cdot \text{Factor}_v \cdot \text{Factor}_i
+          Q_{\text{DFT}} = 0,5 \cdot (v_{\text{im}} \cdot i_{\text{re}} - v_{\text{re}} \cdot i_{\text{im}}) \cdot \text{Factor}_v \cdot \text{Factor}_i
         \end{equation}
         Si $Q_{\text{DFT}} < -\qty{5}{\text{VAr}}$, se invierte el signo del ángulo ($\phi = -\phi_{\text{mag}}$), lo que corresponde a los cuadrantes III y IV (comportamiento capacitivo). De lo contrario, se mantiene positivo (comportamiento inductivo). Finalmente, se aplican bandas muertas de seguridad: ante una potencia activa $P$ dentro del rango de $\pm\qty{5}{\watt}$ el factor de potencia ($FP$) se fuerza a cero, y ante una potencia reactiva de bin único $Q_{\text{DFT}}$ dentro del rango de $\pm\qty{5}{\text{VAr}}$, el ángulo de desfase ($\phi$) se fuerza a cero.
   \item \textbf{Potencia Reactiva ($Q$):} Se calcula a partir de la potencia aparente ($S$) y el seno del ángulo de desfase ($\phi$):
@@ -341,11 +341,9 @@ A nivel de firmware, las ecuaciones y el flujo de procesamiento digital implemen
         El signo de $Q$ (inductivo para $Q > 0$ y capacitivo para $Q < 0$) queda determinado por el signo de $\phi$. Si se activa la banda muerta del ángulo ($\phi = 0$), la potencia reactiva resultante se fuerza a cero.
 \end{itemize}
 
-Esta metodología híbrida para la determinación del desfasaje y la potencia reactiva responde a limitaciones matemáticas y consideraciones prácticas de diseño del sistema embebido:
-\begin{itemize}
-  \item \textbf{Limitación matemática del arcocoseno:} Debido a que la función coseno es par ($\cos(\phi) = \cos(-\phi)$), la función inversa $\arccos(x)$ se encuentra restringida al rango de $[0, 180^{\circ}]$ (cuadrantes I y II). Por lo tanto, no es posible determinar si la corriente está adelantada (comportamiento capacitivo, $\phi < 0$) o retrasada (comportamiento inductivo, $\phi > 0$) respecto a la tensión utilizando únicamente la relación de potencia activa y aparente. El signo de la componente fundamental $Q_{\text{DFT}}$ (calculada mediante la DFT de bin único) aporta la dirección del flujo de energía reactiva, permitiendo extender el rango del ángulo de desfase a los cuatro cuadrantes ($[-180^{\circ}, 180^{\circ}]$).
-  \item \textbf{Consistencia y simplificación de la calibración:} Calcular la magnitud de la potencia reactiva a través del triángulo de potencias mediante $Q = S \cdot \sin(\phi)$ (equivalente a la magnitud de $\sqrt{S^2 - P^2}$) asegura que los cálculos se mantengan acotados por los valores eficaces globales. Además, presenta una gran ventaja en el proceso de calibración del instrumento: la magnitud de $Q$ hereda de forma directa las constantes de calibración aplicadas a $V_{\text{rms}}$, $I_{\text{rms}}$ y $P$, evitando tener que calibrar un factor de escala adicional para la magnitud de la DFT de forma aislada en el firmware.
-\end{itemize}
+Esta metodología híbrida para la determinación del desfasaje responde a la limitación matemática de la función arcocoseno. Debido a que la función coseno es par ($\cos(\phi) = \cos(-\phi)$), la función inversa $\arccos(x)$ se encuentra restringida al rango de $[0, 180^{\circ}]$ (cuadrantes I y II). Por lo tanto, no es posible determinar si la corriente está adelantada (comportamiento capacitivo, $\phi < 0$) o retrasada (comportamiento inductivo, $\phi > 0$) respecto a la tensión utilizando únicamente la relación de potencia activa y aparente. El signo de la componente fundamental $Q_{\text{DFT}}$ (calculada mediante la DFT de bin único) aporta la dirección del flujo de energía reactiva, permitiendo extender el rango del ángulo de desfase a los cuatro cuadrantes.
+
+A continuación se detallan las características y funciones del gateway de comunicaciones y seguridad, basado en el microcontrolador ESP32-C3.
 
 \subsubsection{Gateway IoT y Seguridad (ESP32-C3)}
 
@@ -507,7 +505,7 @@ El panel de control se ilustra en la figura~\ref{fig:db_schema}, la que muestra 
 
 La interfaz final de usuario se desarrolló sobre \textbf{Grafana}, permitiendo una visualización dinámica y en tiempo real de los parámetros eléctricos (como se muestra en la figura~\ref{fig:grafana_dashboard}):
 
-\begin{figure}[H]
+\begin{figure}[t]
   \centering
   \begin{subfigure}[b]{0.48\textwidth}
     \centering
@@ -608,20 +606,6 @@ Con el prototipo integrado y calibrado, se realizaron ensayos orientados a verif
   \item[Resultados de los ensayos:] Los resultados de error relativo y linealidad obtenidos para las corrientes y desfases ensayados en ambas etapas se presentan gráficamente en la figura~\ref{fig:resultados_trifasica} (para la etapa de ensayo trifásica) y en la figura~\ref{fig:resultados_monofasica} (para la etapa de ensayo monofásica de alta potencia). En ambas configuraciones, se observa que la respuesta del sistema se mantiene estable tanto para condiciones de inyección como de consumo, demostrando la consistencia de los algoritmos de cálculo e integración de señales implementados en el prototipo.
 \end{description}
 
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.9\textwidth]{imgs/resultados_trifasica.png}
-  \caption{Distribución del error relativo de potencia activa (eje Y) frente a la corriente nominal de referencia (eje X) en la primera etapa de ensayos (\qty{0.6}{\ampere} a \qty{15}{\ampere}).}
-  \label{fig:resultados_trifasica}
-\end{figure}
-
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.9\textwidth]{imgs/resultados_monofasica.png}
-  \caption{Distribución del error relativo de potencia activa (eje Y) frente a la corriente nominal de referencia (eje X) en la segunda etapa de ensayos (\qty{5}{\ampere} a \qty{50}{\ampere}).}
-  \label{fig:resultados_monofasica}
-\end{figure}
-
 \subsubsection{Análisis y Discusión de Resultados}
 
 El análisis cuantitativo de los datos consolidados en los ensayos permite extraer las siguientes conclusiones sobre el comportamiento del sistema de medición:
@@ -633,6 +617,20 @@ El análisis cuantitativo de los datos consolidados en los ensayos permite extra
   \item \textbf{Desviación a Alta Carga:} Al alcanzar los \qty{50}{\ampere} (figura~\ref{fig:resultados_monofasica}), se aprecia un desplazamiento sistemático de los errores: en consumo los errores se vuelven negativos (mediana entre \qty{-1.5}{\percent} y \qty{-2.6}{\percent}) y en inyección se vuelven positivos (mediana entre \qty{1.0}{\percent} y \qty{2.0}{\percent}). Este comportamiento evidencia una desviación sistemática en los límites superiores de carga que requiere ser abordada en futuros trabajos de ajuste.
   \item \textbf{Ajuste de Fase y Dispersión entre Canales:} El hecho de que la dispersión de los errores se mantenga reducida incluso bajo desfases exigentes de \qty{10}{\degree} y \qty{45}{\degree} valida la efectividad del algoritmo de compensación de desfase implementado en el firmware. Por otro lado, la Fase~3 muestra de forma consistente errores ligeramente más positivos (o menos negativos) que las Fases~1 y 2, lo que resalta la necesidad de realizar una calibración fina de este canal de adquisición.
 \end{itemize}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.9\textwidth]{imgs/resultados_trifasica.png}
+  \caption{Distribución del error relativo de potencia activa (eje Y) frente a la corriente nominal de referencia (eje X) en la primera etapa de ensayos (\qty{0.6}{\ampere} a \qty{15}{\ampere}).}
+  \label{fig:resultados_trifasica}
+\end{figure}
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=0.9\textwidth]{imgs/resultados_monofasica.png}
+  \caption{Distribución del error relativo de potencia activa (eje Y) frente a la corriente nominal de referencia (eje X) en la segunda etapa de ensayos (\qty{5}{\ampere} a \qty{50}{\ampere}).}
+  \label{fig:resultados_monofasica}
+\end{figure}
 
 En síntesis, si bien los ensayos de exactitud y linealidad validan la viabilidad de la arquitectura propuesta para el monitoreo fotovoltaico bidireccional, los desvíos observados en los extremos del rango operativo indican la necesidad de continuar trabajando en la calibración y el refinamiento de la etapa analógica para alcanzar un mayor grado de precisión y exactitud en la medición. Por otro lado, cabe destacar que durante la totalidad de estos ensayos se verificó el correcto funcionamiento de la infraestructura de comunicación y almacenamiento: la totalidad de los datos de medición fue transmitida con éxito y de manera remota a la base de datos a través de los servicios descritos, demostrando que el subsistema IoT operó según los requerimientos de diseño establecidos.
 
